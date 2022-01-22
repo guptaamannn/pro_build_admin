@@ -8,6 +8,9 @@ class Firestore {
   final CollectionReference<Map<String, dynamic>> _attendance =
       FirebaseFirestore.instance.collection("attendance");
 
+  final CollectionReference<Map<String, dynamic>> _payments =
+      FirebaseFirestore.instance.collection("payments");
+
   Stream<DocumentSnapshot<Map<String, dynamic>>> attendanceStream(
           String documentId) =>
       _attendance.doc(documentId).snapshots();
@@ -132,5 +135,14 @@ class Firestore {
         .orderBy('phone')
         .limit(3)
         .get();
+  }
+
+  //<--------------- Payments -------------------->
+  Stream<QuerySnapshot<Map<String, dynamic>>> invoiceStream() {
+    return _payments.snapshots();
+  }
+
+  createInvoice(Map<String, dynamic> invoice) async {
+    await _payments.doc().set(invoice);
   }
 }

@@ -201,8 +201,10 @@ class AttendanceList extends StatelessWidget {
       reverse: true,
       itemBuilder: (context, index) {
         if (model.users?.first.attendTime != null) {
-          model.users!
-              .sort((a, b) => a.attendTime!.compareTo(b.attendTime.toString()));
+          model.users!.sort((a, b) => Formatter.stringToTimeOfDay(a.attendTime!)
+              .toString()
+              .compareTo(
+                  Formatter.stringToTimeOfDay(b.attendTime!).toString()));
         }
         String? lastTime;
         if (index < model.userIds!.length - 1) {

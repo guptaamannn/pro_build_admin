@@ -92,7 +92,7 @@ class UserView extends StatelessWidget {
                   ),
                   IconButton(
                     icon: Icon(Icons.attach_money_rounded),
-                    onPressed: () => model.addPayments(),
+                    onPressed: () => model.addPayments(user),
                   ),
                 ],
               ),

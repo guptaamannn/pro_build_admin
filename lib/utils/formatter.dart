@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart' show TimeOfDay;
 import 'package:intl/intl.dart';
 
 class Formatter {
@@ -19,9 +20,10 @@ class Formatter {
   }
 
   /// Returns current time in 12:00 AM format.
-  static String get getCurrentTime {
+  static DateTime get getCurrentTime {
     DateTime now = DateTime.now();
-    return DateFormat.jm().format(now);
+    DateFormat format = DateFormat.jm();
+    return format.parse(now.toString());
   }
 
   /// Returns [String] from [DateTime] formatted to match attendance document id.
@@ -40,5 +42,17 @@ class Formatter {
   static String toDay(DateTime date) {
     DateFormat format = DateFormat("EE");
     return format.format(date);
+  }
+
+  ///Returns [DateTime] from [String] like 12:00 AM
+  // static DateTime stringToDateTime(String tod) {
+  //   final format = DateFormat.jm();
+  //   return format.parse(tod);
+  // }
+
+  ///Returns [TimeOfDay] from [String]
+  static TimeOfDay stringToTimeOfDay(String tod) {
+    final format = DateFormat.jm();
+    return TimeOfDay.fromDateTime(format.parse(tod));
   }
 }

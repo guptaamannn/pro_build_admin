@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pro_build_attendance/model/user.dart';
 import 'package:pro_build_attendance/services/firestore_service.dart';
 import 'package:pro_build_attendance/services/url_launch_service.dart';
+import 'package:pro_build_attendance/views/payments/payment_form.dart';
 import 'package:pro_build_attendance/views/user/user_edit_view.dart';
 
 class UserViewModel {
@@ -59,9 +60,8 @@ class UserViewModel {
       return 0;
   }
 
-  addPayments() {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text("Payments Feature Coming Soon!"),
-    ));
+  addPayments(User user) {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => PaymentForm(user: user)));
   }
 }
