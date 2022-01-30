@@ -19,7 +19,7 @@ class UserViewModel {
   }
 
   Future<void> updateEDate(User user, DateTime date) async {
-    await _firestore.updateEDate(user.id, date);
+    await _firestore.updateEDate(user.id!, date);
   }
 
   Future<void> callUser(String phone) async {
@@ -53,15 +53,15 @@ class UserViewModel {
   }
 
   Future<int> useAfterEnd(User user) async {
-    if (user.eDate.isBefore(DateTime.now())) {
-      int days = await _firestore.daysAfterExp(user.id, user.eDate);
+    if (user.eDate!.isBefore(DateTime.now())) {
+      int days = await _firestore.daysAfterExp(user.id!, user.eDate!);
       return days;
     } else
       return 0;
   }
 
   addPayments(User user) {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => PaymentForm(user: user)));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => PaymentForm(user)));
   }
 }

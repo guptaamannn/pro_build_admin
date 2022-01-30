@@ -59,4 +59,14 @@ class Ui extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  //<----- Invoice Form------>
+  List<Map<String, dynamic>> _list = [];
+
+  List<Map<String, dynamic>> getMoreItems() => _list;
+
+  void updateAdditionalItems(Map<String, dynamic> data) {
+    _list.add(data);
+    notifyListeners();
+  }
 }

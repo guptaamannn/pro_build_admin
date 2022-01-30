@@ -32,6 +32,11 @@ class Formatter {
     return formatter.format(date);
   }
 
+  static DateTime fromString(String date) {
+    DateFormat format = DateFormat('yyyy-MMM-dd');
+    return format.parse(date);
+  }
+
   /// Returns Month name from [DateTime]
   static String toMonth(DateTime date) {
     DateFormat formatter = DateFormat("MMMM");

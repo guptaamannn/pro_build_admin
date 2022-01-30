@@ -35,7 +35,7 @@ class SearchUser extends StatelessWidget {
             ? store = context
                 .read<Ui>()
                 .getUsers
-                .where((element) => element.name.contains(query))
+                .where((element) => element.name!.contains(query))
             : store = context
                 .read<Ui>()
                 .getUsers
@@ -81,7 +81,7 @@ class SearchUser extends StatelessWidget {
               : CircleAvatar(
                   child: Icon(Icons.person),
                 ),
-          title: Text(user.name),
+          title: Text(user.name!),
         );
       },
       onSuggestionSelected: (User user) {

@@ -95,7 +95,7 @@ class UsersList extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => UserView(userId: _user.id),
+                              builder: (context) => UserView(userId: _user.id!),
                             ),
                           );
                         },
@@ -123,7 +123,7 @@ class UsersListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isExpired = DateTime.now().isAfter(user.eDate);
+    bool isExpired = DateTime.now().isAfter(user.eDate!);
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -133,7 +133,7 @@ class UsersListCard extends StatelessWidget {
             imageUrl: user.dpUrl,
             name: user.name,
           ),
-          title: Text(user.name),
+          title: Text(user.name!),
           subtitle: Text("${user.phone}"),
           trailing: Container(
             padding: EdgeInsets.all(6),

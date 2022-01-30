@@ -46,7 +46,7 @@ class UserView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Hero(
-                      tag: user.id,
+                      tag: user.id!,
                       child: ImageAvatar(
                         imageUrl: user.dpUrl,
                         name: user.name,
@@ -57,10 +57,10 @@ class UserView extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(user.name,
+                          Text(user.name!,
                               softWrap: true,
                               style: Theme.of(context).textTheme.headline5),
-                          Text(user.id,
+                          Text(user.id!,
                               style: Theme.of(context).textTheme.subtitle1),
                         ],
                       ),
@@ -91,7 +91,7 @@ class UserView extends StatelessWidget {
                     onPressed: () => model.mailUser(user),
                   ),
                   IconButton(
-                    icon: Icon(Icons.attach_money_rounded),
+                    icon: Icon(Icons.payment_rounded),
                     onPressed: () => model.addPayments(user),
                   ),
                 ],

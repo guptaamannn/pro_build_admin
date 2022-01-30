@@ -16,11 +16,12 @@ class UserEditModel {
   Future<void> updateUserInfo({required User user, String? dp}) async {
     context.read<Ui>().setLoading();
     if (dp != null) {
-      String? imageUrl = await _storageService.uploadPicture(File(dp), user.id);
+      String? imageUrl =
+          await _storageService.uploadPicture(File(dp), user.id!);
       user.dpUrl = imageUrl;
     }
 
-    await _firestore.updateUserInfo(user.id, user.toJson());
+    await _firestore.updateUserInfo(user.id!, user.toJson());
     context.read<Ui>().setLoading();
   }
 }

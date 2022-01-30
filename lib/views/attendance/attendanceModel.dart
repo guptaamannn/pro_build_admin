@@ -43,7 +43,7 @@ class AttendanceViewModel {
         return AlertDialog(
           title: Text("Heads-up"),
           content:
-              Text("Remove ${user.name.split(" ")[0]} from selected date?"),
+              Text("Remove ${user.name!.split(" ")[0]} from selected date?"),
           actions: [
             TextButton(
                 onPressed: () {

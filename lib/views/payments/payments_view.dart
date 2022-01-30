@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pro_build_attendance/model/invoice.dart';
+import 'package:pro_build_attendance/utils/formatter.dart';
 import 'package:pro_build_attendance/views/payments/payments_view_model.dart';
 
 class PaymentsView extends StatelessWidget {
@@ -29,15 +30,18 @@ class PaymentsView extends StatelessWidget {
                 );
               }
               return ListView.builder(
+                itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
+                  Invoice invoice = snapshot.data!.toList()[index];
                   return ListTile(
-                    leading: CircleAvatar(child: Icon(Icons.person)),
-                    title: Text(
-                        snapshot.data!.toList()[index].userName.toString()),
+                    leading: Text(Formatter.fromDateTime(invoice.orderDate)),
+                    title: Text(invoice.account!.name.toString()),
                     subtitle: Text(
-                        snapshot.data!.toList()[index].orderDate.toString()),
+                      Formatter.fromDateTime(
+                          snapshot.data!.toList()[index].orderDate),
+                    ),
                     trailing:
-                        Text(snapshot.data!.toList()[index].amount.toString()),
+                        Text("\u{20B9} " + invoice.totalAmount.toString()),
                   );
                 },
               );

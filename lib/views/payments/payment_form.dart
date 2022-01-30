@@ -2,179 +2,346 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:pro_build_attendance/model/invoice.dart';
 import 'package:pro_build_attendance/model/user.dart';
+import 'package:pro_build_attendance/provider/ui_provider.dart';
 import 'package:pro_build_attendance/utils/formatter.dart';
 import 'package:pro_build_attendance/utils/input_decoration.dart';
 import 'package:pro_build_attendance/views/payments/payments_view_model.dart';
 import 'package:pro_build_attendance/widgets/image_avatar.dart';
+import 'package:pro_build_attendance/widgets/loading_overlay.dart';
+import 'package:provider/provider.dart';
 
-enum PaymentMode { cash, transfer }
+enum Products { Registration, Gym, Locker, Other }
+enum PaymentMode { Cash, Transfer }
 
 class PaymentForm extends HookWidget {
-  final User? user;
+  final User user;
 
-  final _formKey = GlobalKey<FormState>();
-  final invoice = Invoice(orderDate: DateTime.now());
-  final PaymentsViewModel model = PaymentsViewModel();
-
-  PaymentForm({Key? key, this.user}) : super(key: key);
+  PaymentForm(this.user);
 
   @override
   Widget build(BuildContext context) {
-    final orderDate = useTextEditingController(
-      text: Formatter.fromDateTime(DateTime.now()),
+    final invoice = useState(
+      Invoice(
+          orderDate: DateTime.now(),
+          account: user,
+          userId: user.id,
+          mop: "Cash",
+          totalAmount: "1500",
+          order: [
+            Order(
+                decription: "Gym",
+                amount: "1500",
+                validFrom: user.eDate,
+                validTill: user.eDate!.add(
+                  Duration(days: 30),
+                ))
+          ]),
     );
-    final validFromController =
-        useTextEditingController(text: Formatter.fromDateTime(user!.eDate));
-    final validTillController = useTextEditingController(
-        text: Formatter.fromDateTime(DateTime(
-            user!.eDate.year, user!.eDate.month + 1, user!.eDate.day)));
-    final modelOfPayment = useState(PaymentMode.cash);
+    final numberOfProducts = useState(1);
+    final ValueNotifier<PaymentMode> modeOfPayment = useState(PaymentMode.Cash);
+    final orderDateController = useTextEditingController(
+        text: Formatter.fromDateTime(invoice.value.orderDate));
+    final totalAmount = useState('1500');
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text("Create Invoice"),
-        elevation: 0,
-      ),
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding: EdgeInsets.all(10),
-            children: [
-              Stack(
-                children: [
-                  Center(
-                    child: Hero(
-                      tag: user!.id,
-                      child: ImageAvatar(
-                        imageUrl: user!.dpUrl,
-                        name: user!.name,
-                        radius: 40,
+      body: ModalProgressIndicator(
+        isLoading: context.watch<Ui>().isLoading,
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              automaticallyImplyLeading: false,
+              expandedHeight: 160.0,
+              flexibleSpace: FlexibleSpaceBar(
+                centerTitle: false,
+                titlePadding: EdgeInsets.fromLTRB(10, 8, 0, 20),
+                title: Text('Record Payment'),
+              ),
+              actions: [CloseButton()],
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.all(8.0),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    TextFormField(
+                      controller: orderDateController,
+                      decoration: getInputDecoration("Order Date"),
+                      readOnly: true,
+                      onTap: () async {
+                        var orderDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: user.joinedDate!,
+                          lastDate: DateTime(2030),
+                        );
+                        if (orderDate != null) {
+                          invoice.value.orderDate = orderDate;
+                          orderDateController.text =
+                              Formatter.fromDateTime(orderDate);
+                        }
+                      },
+                    ),
+                    ListTile(
+                      leading:
+                          ImageAvatar(imageUrl: user.dpUrl, name: user.name),
+                      title: Text(user.name!),
+                      subtitle: Text(user.phone!),
+                      trailing: Icon(Icons.arrow_forward_ios_rounded),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.all(8.0),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    return ProductDetails(
+                      index: index,
+                      invoice: invoice,
+                      user: user,
+                      totalItem: numberOfProducts,
+                      totalAmount: totalAmount,
+                    );
+                  },
+                  childCount: numberOfProducts.value,
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.all(8.0),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Total"),
+                        Text("Rs " + totalAmount.value)
+                      ],
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          numberOfProducts.value += 1;
+                          invoice.value.order?.add(Order());
+                        },
+                        child: Text("Add Item"),
                       ),
                     ),
-                  ),
-                  // Align(alignment: Alignment.topRight, child: CloseButton())
-                ],
+                    Text("Mode of Payment"),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: PaymentMode.values
+                          .map(
+                            (e) => Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Radio<PaymentMode>(
+                                  value: e,
+                                  groupValue: modeOfPayment.value,
+                                  onChanged: (value) {
+                                    modeOfPayment.value = value!;
+                                    invoice.value.mop = value.name;
+                                  },
+                                ),
+                                Text(e.name),
+                                SizedBox(width: 20),
+                              ],
+                            ),
+                          )
+                          .toList(),
+                    ),
+                    TextFormField(
+                      decoration: getInputDecoration("Notes"),
+                      onChanged: (value) => invoice.value.notes = value,
+                    ),
+                    ElevatedButton(
+                        onPressed: () async {
+                          context.read<Ui>().setLoading();
+                          await PaymentsViewModel()
+                              .createInvoice(invoice.value);
+                          context.read<Ui>().setLoading();
+                          Navigator.pop(context);
+                        },
+                        child: Text("Submit"))
+                  ],
+                ),
               ),
-              addSpace(height: 5),
-              Center(
-                child: Text(user!.name,
-                    style: Theme.of(context).textTheme.headline5),
-              ),
-              addSpace(),
-              //Order Date
-              TextFormField(
-                readOnly: true,
-                controller: orderDate,
-                decoration: getInputDecoration("Order Date"),
-                onTap: () async {
-                  var date = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: user!.joinedDate!,
-                    lastDate: DateTime.now(),
-                  );
-                  if (date != null) {
-                    invoice.orderDate = date;
-                    orderDate.text = Formatter.fromDateTime(date);
-                  }
-                },
-              ),
-              addSpace(),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-              //Valid From
+class ProductDetails extends HookWidget {
+  final User user;
+  final int index;
+  final ValueNotifier<Invoice> invoice;
+  final ValueNotifier<int> totalItem;
+  final ValueNotifier<String> totalAmount;
+
+  ProductDetails({
+    required this.user,
+    required this.invoice,
+    required this.index,
+    required this.totalItem,
+    required this.totalAmount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final product = useState(Products.Gym);
+    final validFromController = useTextEditingController(
+      text: invoice.value.order?[index].validFrom != null
+          ? Formatter.fromDateTime(invoice.value.order![index].validFrom)
+          : null,
+    );
+    final validTillController = useTextEditingController(
+      text: invoice.value.order?[index].validTill != null
+          ? Formatter.fromDateTime(invoice.value.order![index].validTill)
+          : null,
+    );
+
+    return Stack(
+      children: [
+        Container(
+          padding: EdgeInsets.all(30),
+          margin: EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.white,
+              )),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Expanded(
-                    child: TextFormField(
-                      decoration: getInputDecoration('From'),
-                      controller: validFromController,
-                      readOnly: true,
-                      onTap: () async {
-                        var range = await showDateRangePicker(
-                            context: context,
-                            firstDate: user!.joinedDate!,
-                            lastDate: DateTime(2030));
-                        if (range != null) {
-                          invoice.validFrom = range.start;
-                          invoice.validTill = range.end;
-                          validFromController.text =
-                              Formatter.fromDateTime(range.start);
-                          validTillController.text =
-                              Formatter.fromDateTime(range.end);
+                    child: DropdownButtonFormField<Products>(
+                      value: Products.Gym,
+                      items: Products.values
+                          .map(
+                            (e) => DropdownMenuItem<Products>(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    product.value == e
+                                        ? Icon(Icons.check)
+                                        : Container(width: 24),
+                                    SizedBox(width: 20),
+                                    Text(e.name),
+                                  ],
+                                ),
+                                value: e),
+                          )
+                          .toList(),
+                      selectedItemBuilder: (context) {
+                        return Products.values
+                            .map((e) => Text(e.name))
+                            .toList();
+                      },
+                      onChanged: (value) {
+                        product.value = value!;
+                        if (value != Products.Other) {
+                          invoice.value.order![index].decription = value.name;
+                        } else {
+                          invoice.value.order![index].validFrom = null;
+                          invoice.value.order![index].validTill = null;
                         }
                       },
+                      decoration: getInputDecoration('Product'),
                     ),
                   ),
-                  addSpace(width: 12),
-                  //Valid till
+                  SizedBox(width: 10),
                   Expanded(
                     child: TextFormField(
-                      decoration: getInputDecoration('To'),
-                      readOnly: true,
-                      controller: validTillController,
+                      onChanged: (value) => {
+                        invoice.value.order![index].amount = value,
+                        totalAmount.value = invoice.value.getTotal(),
+                      },
+                      decoration: getInputDecoration("Price"),
+                      keyboardType: TextInputType.number,
+                      initialValue: invoice.value.order![index].amount,
                     ),
-                  ),
+                  )
                 ],
               ),
-              addSpace(),
-              Text("Mode of Payment"),
-              Row(
-                children: [
-                  Radio(
-                    value: PaymentMode.cash,
-                    groupValue: modelOfPayment.value,
-                    onChanged: (value) =>
-                        modelOfPayment.value = PaymentMode.cash,
-                  ),
-                  Text("Cash"),
-                  SizedBox(width: 12),
-                  Radio(
-                    value: PaymentMode.transfer,
-                    groupValue: modelOfPayment.value,
-                    onChanged: (value) =>
-                        modelOfPayment.value = PaymentMode.transfer,
-                  ),
-                  Text('Bank Transfer'),
-                ],
-              ),
-              // addSpace(),
-              TextFormField(
-                decoration: getInputDecoration(
-                  'Amount',
-                ).copyWith(prefixText: '\u{20B9} '),
-                initialValue: '1500',
-                onSaved: (value) => invoice.amount = value,
-              ),
-              addSpace(),
-              TextFormField(
-                decoration: getInputDecoration('Notes'),
-                onSaved: (newValue) => invoice.notes = newValue,
-              ),
-              ListTile(
-                trailing:
-                    TextButton(onPressed: () {}, child: Text("+ More Items")),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    invoice.userId = user!.id;
-                    invoice.userName = user!.name;
-                    print(invoice.toJson());
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: Text("Confirm"),
-                ),
-              ),
+              SizedBox(height: 10),
+              product.value == Products.Registration
+                  ? Container()
+                  : product.value != Products.Other
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                decoration: getInputDecoration('From'),
+                                controller: validFromController,
+                                readOnly: true,
+                                onTap: () async {
+                                  var range = await showDateRangePicker(
+                                    context: context,
+                                    firstDate: user.joinedDate!,
+                                    lastDate: DateTime(2030),
+                                    initialDateRange:
+                                        invoice.value.order?[index].validFrom ==
+                                                null
+                                            ? null
+                                            : DateTimeRange(
+                                                start: invoice.value
+                                                    .order![index].validFrom!,
+                                                end: invoice.value.order![index]
+                                                    .validTill!),
+                                  );
+                                  if (range != null) {
+                                    validFromController.text =
+                                        Formatter.fromDateTime(range.start);
+                                    validTillController.text =
+                                        Formatter.fromDateTime(range.end);
+                                  }
+                                },
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: TextFormField(
+                                decoration: getInputDecoration('To'),
+                                readOnly: true,
+                                controller: validTillController,
+                              ),
+                            ),
+                          ],
+                        )
+                      : TextFormField(
+                          decoration: getInputDecoration('Product Name'),
+                          onChanged: (value) =>
+                              invoice.value.order![index].decription = value,
+                        ),
             ],
           ),
         ),
-      ),
+        Positioned(
+          right: 0,
+          top: 0,
+          child: index == 0
+              ? Container()
+              : IconButton(
+                  icon: Icon(Icons.highlight_off),
+                  onPressed: () {
+                    invoice.value.order!.removeAt(index);
+                    totalItem.value -= 1;
+                  },
+                ),
+        ),
+      ],
     );
   }
 }

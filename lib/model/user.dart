@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class User {
-  String name;
+  String? name;
   String? phone;
   String? dpUrl;
-  String id;
-  DateTime eDate;
+  String? id;
+  DateTime? eDate;
   String? email;
   DateTime? joinedDate;
   String? address;

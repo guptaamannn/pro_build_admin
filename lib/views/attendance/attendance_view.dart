@@ -7,6 +7,7 @@ import 'package:pro_build_attendance/views/forms/attendance_form.dart';
 import 'package:pro_build_attendance/views/forms/user_create_form.dart';
 import 'package:pro_build_attendance/views/attendance/attendance_list_tile.dart';
 import 'package:pro_build_attendance/views/attendance/attendanceModel.dart';
+import 'package:pro_build_attendance/views/payments/payments_view.dart';
 import 'package:pro_build_attendance/views/user/user_view.dart';
 import 'package:pro_build_attendance/views/users/users_view.dart';
 import 'package:pro_build_attendance/widgets/date_pill.dart';
@@ -114,6 +115,9 @@ class FullView extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => UsersView()));
               } else if (value == 'log-out') {
                 model.logOut();
+              } else if (value == 'payments') {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => PaymentsView()));
               }
             },
             itemBuilder: (context) {
@@ -140,6 +144,16 @@ class FullView extends StatelessWidget {
                     ],
                   ),
                   value: 'all-users',
+                ),
+                PopupMenuItem(
+                  child: Row(
+                    children: [
+                      Icon(Icons.payments_rounded),
+                      SizedBox(width: 8),
+                      Text("Payments")
+                    ],
+                  ),
+                  value: 'payments',
                 ),
                 PopupMenuItem(
                   child: Row(
@@ -217,7 +231,7 @@ class AttendanceList extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: AttendanceListTile(
             isSubExpired:
-                AttendanceViewModel(context).isSubExpired(_user.eDate),
+                AttendanceViewModel(context).isSubExpired(_user.eDate!),
             user: _user,
             showTime: lastTime != null ? lastTime == _user.attendTime : null,
             onLongPress: () {
@@ -227,7 +241,7 @@ class AttendanceList extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) =>
-                    UserView(userId: model.users!.reversed.toList()[index].id),
+                    UserView(userId: model.users!.reversed.toList()[index].id!),
               ),
             ),
           ),

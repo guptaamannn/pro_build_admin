@@ -142,7 +142,8 @@ class Firestore {
     return _payments.snapshots();
   }
 
-  createInvoice(Map<String, dynamic> invoice) async {
-    await _payments.doc().set(invoice);
+  createInvoice(Map<String, dynamic> invoice, DateTime? eDate) async {
+    await _payments.doc(invoice["invoiceId"]).set(invoice);
+    if (eDate != null) await updateEDate(invoice["userId"], eDate);
   }
 }

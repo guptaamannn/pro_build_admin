@@ -1,3 +1,4 @@
+import 'package:nanoid/async.dart';
 import 'package:pro_build_attendance/model/invoice.dart';
 import 'package:pro_build_attendance/model/user.dart';
 import 'package:pro_build_attendance/services/firestore_service.dart';
@@ -13,16 +14,19 @@ class PaymentsViewModel {
         .map((event) => event.docs.map((doc) => Invoice.fromJson(doc.data())));
   }
 
-  Future<void> createInvoice(User user, Invoice invoice) async {
-    invoice.userId = user.id;
-    invoice.userName = user.name;
-    invoice.userEmail = user.email;
-    invoice.userPhone = user.phone;
-    // await _firestore.createInvoice(invoice.toJson);
-    print(invoice.toJson());
+  Future<void> createInvoice(Invoice invoice) async {
+    String id = await nanoid(12);
+    invoice.invoiceId = id;
+    DateTime? eDate;
+    for (var order in invoice.order!) {
+      if (order.decription == "Gym") {
+        eDate = order.validTill!;
+      }
+    }
+    await _firestore.createInvoice(invoice.toJson(), eDate);
   }
 
   Future<String?> getDpUrl(User user) async {
-    return await _storage.downloadUrl(user.id);
+    return await _storage.downloadUrl(user.id!);
   }
 }

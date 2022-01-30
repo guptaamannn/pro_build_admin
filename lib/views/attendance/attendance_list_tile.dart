@@ -62,7 +62,7 @@ class AttendanceListTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Hero(
-                        tag: user.id,
+                        tag: user.id!,
                         child:
                             ImageAvatar(name: user.name, imageUrl: user.dpUrl)),
                     SizedBox(
@@ -75,7 +75,7 @@ class AttendanceListTile extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            user.name,
+                            user.name!,
                             overflow: TextOverflow.fade,
                             softWrap: false,
                             style: TextStyle(

@@ -13,8 +13,8 @@ class PaymentView extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            Text(invoice.amount.toString()),
-            Text(invoice.userName.toString()),
+            // Text(invoice.totalAmount.toString()),
+            Text(invoice.account!.name.toString()),
           ],
         ),
       ),
