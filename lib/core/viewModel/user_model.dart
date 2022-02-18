@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:nanoid/async.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pro_build_attendance/core/enums/view_state.dart';
+import 'package:pro_build_attendance/core/model/invoice.dart';
 import 'package:pro_build_attendance/core/model/user.dart';
 import 'package:pro_build_attendance/core/services/firestore_service.dart';
 import 'package:pro_build_attendance/core/services/storage_service.dart';
@@ -156,11 +156,13 @@ class UserModel extends BaseModel {
     notifyListeners();
   }
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> getUsersStream() {
-    return _firestore.getUsersStream(
-      sortBy: _sortBy,
-      sortByDescending: _isSortByDescending,
-    );
+  Stream<Iterable<User>> getUsersStream() {
+    return _firestore
+        .getUsersStream(
+          sortBy: _sortBy,
+          sortByDescending: _isSortByDescending,
+        )
+        .map((event) => event.docs.map((e) => User.fromUsers(e.data())));
   }
 
   Future<void> updateUserInfo({required User user, String? dp}) async {
@@ -187,5 +189,15 @@ class UserModel extends BaseModel {
       }
     }
     notifyListeners();
+  }
+
+  Future<Invoice?> getLastTransaction(String userId) async {
+    Map<String, dynamic>? snapshot =
+        await _firestore.getLastTransaction(userId);
+    if (snapshot != null) {
+      Invoice invoice = Invoice.fromJson(snapshot);
+      return invoice;
+    }
+    return null;
   }
 }

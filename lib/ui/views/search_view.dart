@@ -84,8 +84,10 @@ class CustomSearchDelegate extends SearchDelegate<User?> {
                   itemBuilder: (context, index) {
                     User result = results[index];
                     return ListTile(
-                      leading: ImageAvatar(
-                          imageUrl: result.dpUrl, name: result.name),
+                      leading: CachedImageAvatar(
+                          fileName: result.id!,
+                          name: result.name,
+                          key: Key(result.id!)),
                       title: Text(result.name!),
                       subtitle: Text(result.phone!),
                       onTap: () {

@@ -6,15 +6,17 @@ import 'package:pro_build_attendance/core/model/user.dart';
 import 'package:pro_build_attendance/core/utils/formatter.dart';
 import 'package:pro_build_attendance/core/viewModel/attendance_model.dart';
 import 'package:pro_build_attendance/locator.dart';
+import 'package:pro_build_attendance/ui/views/search_view.dart';
 import 'package:pro_build_attendance/ui/views/user_view.dart';
 import 'package:pro_build_attendance/ui/widgets/autocomplete_user_search.dart';
+import 'package:pro_build_attendance/ui/widgets/bottom_navigation_bar.dart';
 import 'package:pro_build_attendance/ui/widgets/date_pill.dart';
 import 'package:pro_build_attendance/ui/widgets/dumbbell_spinner.dart';
 import 'package:pro_build_attendance/ui/widgets/error_dialog.dart';
 import 'package:pro_build_attendance/ui/widgets/image_avatar.dart';
 import 'package:pro_build_attendance/ui/widgets/loading_overlay.dart';
-import 'package:pro_build_attendance/ui/widgets/navigation_drawer.dart';
 import 'package:pro_build_attendance/ui/widgets/no_data_image.dart';
+import 'package:pro_build_attendance/ui/widgets/user_create_form.dart';
 
 import 'package:provider/provider.dart';
 
@@ -58,37 +60,71 @@ class AttendanceView extends StatelessWidget {
         actions: [
           IconButton(
               onPressed: () async {
-                DateTime? selectedDate = await showDatePicker(
-                  context: context,
-                  initialDate:
-                      context.read<AttendanceModel>().getSelectedDate(),
-                  firstDate: DateTime(2021),
-                  lastDate: DateTime.now(),
-                );
-                if (selectedDate != null) {
-                  context.read<AttendanceModel>().updateViewDate(selectedDate);
+                User? result = await showSearch<User?>(
+                    context: context, delegate: CustomSearchDelegate());
+                if (result != null) {
+                  Navigator.pushNamed(context, UserView.id,
+                      arguments: result.id);
                 }
               },
-              icon: Icon(Icons.calendar_today_rounded)),
+              icon: Icon(Icons.search)),
+          IconButton(
+            onPressed: () async {
+              DateTime? selectedDate = await showDatePicker(
+                context: context,
+                initialDate: context.read<AttendanceModel>().getSelectedDate(),
+                firstDate: DateTime(2021),
+                lastDate: DateTime.now(),
+              );
+              if (selectedDate != null) {
+                context.read<AttendanceModel>().updateViewDate(selectedDate);
+              }
+            },
+            icon: Icon(Icons.calendar_today_rounded),
+          ),
         ],
         bottom: _buildCalendarAppBar(context),
       );
     }
 
-    FloatingActionButton _buildFloatingActionButton(
+    Widget _buildFloatingActionButton(
         BuildContext context, AttendanceModel model) {
-      return FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (context) {
-              return AttendanceForm(model);
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            backgroundColor: Theme.of(context).colorScheme.tertiary,
+            heroTag: "something",
+            onPressed: () async {
+              await showModalBottomSheet(
+                isScrollControlled: true,
+                useRootNavigator: true,
+                context: context,
+                builder: (context) {
+                  return UserAttendanceAdd();
+                },
+              );
             },
-          );
-          print("Add User");
-        },
-        child: Icon(Icons.add),
+            child: Icon(Icons.person_add),
+            mini: true,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          SizedBox(height: 12),
+          FloatingActionButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (context) {
+                  return AttendanceForm(model);
+                },
+              );
+              print("Add User");
+            },
+            child: Icon(Icons.add),
+          ),
+        ],
       );
     }
 
@@ -100,9 +136,14 @@ class AttendanceView extends StatelessWidget {
         builder: (context, viewModel, child) {
           return Scaffold(
             appBar: _buildAppBar(context),
-            drawer: NavigationDrawer(
-              currentRoute: AttendanceView.id,
-            ),
+            // drawer: NavigationDrawer(
+            //   currentRoute: AttendanceView.id,
+            // ),
+            bottomNavigationBar: Hero(
+                tag: "nav",
+                child: CustomBottomNavigation(
+                  currentRoute: id,
+                )),
             floatingActionButton:
                 _buildFloatingActionButton(context, viewModel),
             body: ModalProgressIndicator(

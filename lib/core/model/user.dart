@@ -12,11 +12,11 @@ class User {
   String? attendTime;
 
   User({
-    required this.name,
+    this.name,
     this.phone,
     this.dpUrl,
-    required this.id,
-    required this.eDate,
+    this.id,
+    this.eDate,
     this.email,
     this.joinedDate,
     this.address,

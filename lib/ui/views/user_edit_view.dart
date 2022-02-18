@@ -9,25 +9,26 @@ import 'package:pro_build_attendance/ui/widgets/loading_overlay.dart';
 import 'package:provider/provider.dart';
 
 class UserEditView extends HookWidget {
-  final User user;
+  final User? user;
 
-  UserEditView({Key? key, required this.user}) : super(key: key);
+  UserEditView({Key? key, this.user}) : super(key: key);
 
   final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController joinedDateController = useTextEditingController(
-      text: Formatter.fromDateTime(user.joinedDate),
-    );
     final ValueNotifier<String?> path = useState(null);
+    final ValueNotifier<User> userState =
+        useState(user != null ? user! : User());
 
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
           leading: CloseButton(),
-          title: Text("Edit Profile"),
+          title: Text(
+            user != null ? "Edit Profile" : "Create Profile",
+          ),
           centerTitle: false,
           actions: [
             Padding(
@@ -38,7 +39,7 @@ class UserEditView extends HookWidget {
                   onPressed: () async {
                     _formKey.currentState!.save();
                     await context.read<UserModel>().updateUserInfo(
-                          user: user,
+                          user: userState.value,
                           dp: path.value,
                         );
                     Navigator.pop(context);
@@ -54,7 +55,7 @@ class UserEditView extends HookWidget {
           child: ListView(
             children: [
               ImageUpdater(
-                  url: user.dpUrl.toString(),
+                  url: user?.dpUrl.toString(),
                   path: path.value,
                   onChange: (value) {
                     path.value = value;
@@ -73,8 +74,9 @@ class UserEditView extends HookWidget {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8)),
                         ),
-                        initialValue: user.name,
-                        onSaved: (newValue) => user.name = newValue.toString(),
+                        initialValue: user?.name,
+                        onSaved: (newValue) =>
+                            userState.value.name = newValue.toString(),
                         keyboardType: TextInputType.name,
                         textCapitalization: TextCapitalization.words,
                         validator: (value) {
@@ -92,8 +94,8 @@ class UserEditView extends HookWidget {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8)),
                         ),
-                        initialValue: user.phone,
-                        onSaved: (newValue) => user.phone = newValue,
+                        initialValue: userState.value.phone,
+                        onSaved: (newValue) => userState.value.phone = newValue,
                         keyboardType: TextInputType.phone,
                       ),
                       Divider(color: Colors.transparent),
@@ -104,8 +106,8 @@ class UserEditView extends HookWidget {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8)),
                         ),
-                        initialValue: user.email,
-                        onSaved: (newValue) => user.email = newValue,
+                        initialValue: userState.value.email,
+                        onSaved: (newValue) => userState.value.email = newValue,
                         keyboardType: TextInputType.emailAddress,
                       ),
                       Divider(color: Colors.transparent),
@@ -116,8 +118,9 @@ class UserEditView extends HookWidget {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8)),
                         ),
-                        initialValue: user.address,
-                        onSaved: (newValue) => user.address = newValue,
+                        initialValue: userState.value.address,
+                        onSaved: (newValue) =>
+                            userState.value.address = newValue,
                         keyboardType: TextInputType.streetAddress,
                       ),
                       Divider(color: Colors.transparent),
@@ -126,17 +129,14 @@ class UserEditView extends HookWidget {
                         onTap: () async {
                           DateTime? _joinedDate = await showDatePicker(
                             context: context,
-                            initialDate: user.joinedDate != null
+                            initialDate: userState.value.joinedDate != null
                                 ? DateTime.now()
-                                : user.joinedDate!,
+                                : userState.value.joinedDate!,
                             firstDate: DateTime(2021),
                             lastDate: DateTime.now(),
                           );
                           if (_joinedDate != null) {
-                            user.joinedDate = _joinedDate;
-                            joinedDateController.text =
-                                Formatter.fromDateTime(_joinedDate);
-                            print(_joinedDate);
+                            userState.value.joinedDate = _joinedDate;
                           }
                         },
                         decoration: InputDecoration(
@@ -145,7 +145,7 @@ class UserEditView extends HookWidget {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8)),
                         ),
-                        controller: joinedDateController,
+                        initialValue: Formatter.fromDateTime(DateTime.now()),
                       ),
                     ],
                   ),

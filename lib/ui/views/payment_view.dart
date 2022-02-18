@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:pro_build_attendance/core/enums/payments_mode.dart';
 import 'package:pro_build_attendance/core/enums/products.dart';
-import 'package:pro_build_attendance/core/enums/view_state.dart';
 import 'package:pro_build_attendance/core/model/invoice.dart';
 import 'package:pro_build_attendance/core/model/user.dart';
 import 'package:pro_build_attendance/core/utils/formatter.dart';
-import 'package:pro_build_attendance/core/viewModel/payment_model.dart';
+import 'package:pro_build_attendance/core/viewModel/transaction_model.dart';
 import 'package:pro_build_attendance/ui/shared/input_decoration.dart';
+import 'package:pro_build_attendance/ui/views/payment_form.dart';
+import 'package:pro_build_attendance/ui/views/user_view.dart';
 import 'package:pro_build_attendance/ui/widgets/image_avatar.dart';
-import 'package:pro_build_attendance/ui/widgets/loading_overlay.dart';
 import 'package:provider/provider.dart';
 
 class PaymentView extends StatelessWidget {
@@ -19,7 +18,7 @@ class PaymentView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final model = context.read<PaymentModel>();
+    final model = context.read<Transaction>();
     return Scaffold(
       appBar: AppBar(
         title: Text("Receipt"),
@@ -115,23 +114,21 @@ class PaymentView extends StatelessWidget {
                 "Billed To:",
                 style: Theme.of(context).textTheme.headline5,
               ),
-              Row(
-                children: [
-                  Text(
-                    "Name: ",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(invoice.account!.name.toString())
-                ],
-              ),
-              Row(
-                children: [
-                  Text(
-                    "Phone: ",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(invoice.account!.phone.toString()),
-                ],
+              ListTile(
+                leading: CachedImageAvatar(
+                  fileName: invoice.userId!,
+                  name: invoice.account!.name!,
+                ),
+                title: Text(invoice.account!.name!),
+                subtitle: Text(
+                    invoice.account!.phone! + "\n" + invoice.account!.email!),
+                trailing: Icon(Icons.arrow_forward_ios_rounded),
+                selectedTileColor:
+                    Theme.of(context).colorScheme.secondaryContainer,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18)),
+                onTap: () => Navigator.pushNamed(context, UserView.id,
+                    arguments: invoice.userId),
               ),
               Divider(),
               Text(
@@ -144,7 +141,9 @@ class PaymentView extends StatelessWidget {
                           leading: Container(
                               padding: EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surface,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .secondaryContainer,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child:
@@ -152,7 +151,7 @@ class PaymentView extends StatelessWidget {
                           title: Text(e.description!),
                           subtitle: e.validFrom != null
                               ? Text(Formatter.fromDateTime(e.validFrom) +
-                                  " ▶︎ " +
+                                  " - " +
                                   Formatter.fromDateTime(e.validTill))
                               : null,
                           trailing: Text("Rs " + e.amount!),
@@ -173,7 +172,11 @@ class PaymentView extends StatelessWidget {
                       child: OutlinedButton(
                     child: Text("Edit"),
                     onPressed: () {
-                      print("edit");
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  PaymentForm(null, invoice)));
                     },
                   )),
                   SizedBox(width: 10),
@@ -188,185 +191,6 @@ class PaymentView extends StatelessWidget {
               )
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class PaymentForm extends HookWidget {
-  final User user;
-
-  PaymentForm(this.user);
-
-  final formKey = GlobalKey<FormState>();
-
-  @override
-  Widget build(BuildContext context) {
-    final invoice = useState(
-      Invoice(
-          orderDate: DateTime.now(),
-          account: user,
-          userId: user.id,
-          mop: "Cash",
-          totalAmount: "1500",
-          order: [
-            Order(
-                description: "Gym",
-                amount: "1500",
-                validFrom: user.eDate,
-                validTill: user.eDate!.add(
-                  Duration(days: 30),
-                ))
-          ]),
-    );
-    final numberOfProducts = useState(1);
-    final ValueNotifier<PaymentMode> modeOfPayment = useState(PaymentMode.Cash);
-    final orderDateController = useTextEditingController(
-        text: Formatter.fromDateTime(invoice.value.orderDate));
-    final totalAmount = useState('1500');
-
-    return Scaffold(
-      body: ModalProgressIndicator(
-        isLoading: context.watch<PaymentModel>().state == ViewState.busy,
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              pinned: true,
-              automaticallyImplyLeading: false,
-              expandedHeight: 160.0,
-              flexibleSpace: FlexibleSpaceBar(
-                centerTitle: false,
-                titlePadding: EdgeInsets.fromLTRB(10, 8, 0, 20),
-                title: Text(
-                  'Record Payment',
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.onBackground),
-                ),
-              ),
-              actions: [CloseButton()],
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(8.0, 20, 8, 8),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    TextFormField(
-                      controller: orderDateController,
-                      decoration: getInputDecoration("Order Date"),
-                      readOnly: true,
-                      onTap: () async {
-                        var orderDate = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: user.joinedDate!,
-                          lastDate: DateTime(2030),
-                        );
-                        if (orderDate != null) {
-                          invoice.value.orderDate = orderDate;
-                          orderDateController.text =
-                              Formatter.fromDateTime(orderDate);
-                        }
-                      },
-                    ),
-                    ListTile(
-                      leading:
-                          ImageAvatar(imageUrl: user.dpUrl, name: user.name),
-                      title: Text(user.name!),
-                      subtitle: Text(user.phone!),
-                      trailing: Icon(Icons.arrow_forward_ios_rounded),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(8.0, 0, 8, 8),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    return ProductDetails(
-                      index: index,
-                      invoice: invoice,
-                      user: user,
-                      totalItem: numberOfProducts,
-                      totalAmount: totalAmount,
-                    );
-                  },
-                  childCount: numberOfProducts.value,
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(8.0, 0, 8, 8),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            numberOfProducts.value += 1;
-                            invoice.value.order?.add(Order());
-                          },
-                          child: Text("+ Item"),
-                        ),
-                        Spacer(),
-                        Text("Total:  ",
-                            style: Theme.of(context).textTheme.subtitle2),
-                        Text(
-                          "Rs " + totalAmount.value + " ",
-                        )
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Text("Mode of Payment"),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: PaymentMode.values
-                          .map(
-                            (e) => Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Radio<PaymentMode>(
-                                  value: e,
-                                  groupValue: modeOfPayment.value,
-                                  onChanged: (value) {
-                                    modeOfPayment.value = value!;
-                                    invoice.value.mop = value.name;
-                                  },
-                                ),
-                                Text(e.name),
-                                SizedBox(width: 20),
-                              ],
-                            ),
-                          )
-                          .toList(),
-                    ),
-                    TextFormField(
-                      decoration: getInputDecoration("Notes"),
-                      onChanged: (value) => invoice.value.notes = value,
-                    ),
-                    SizedBox(
-                      height: 8,
-                    ),
-                    ElevatedButton(
-                        onPressed: () async {
-                          await context
-                              .read<PaymentModel>()
-                              .createInvoice(invoice.value);
-
-                          Navigator.pop(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(vertical: 14)),
-                        child: Text("Submit"))
-                  ],
-                ),
-              ),
-            )
-          ],
         ),
       ),
     );

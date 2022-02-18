@@ -3,6 +3,9 @@ import 'package:pro_build_attendance/core/model/user.dart';
 import 'package:pro_build_attendance/ui/views/auth_wrapper_view.dart';
 import 'package:pro_build_attendance/core/viewModel/login_model.dart';
 import 'package:pro_build_attendance/ui/views/attendance_view.dart';
+import 'package:pro_build_attendance/ui/views/expenses_view.dart';
+import 'package:pro_build_attendance/ui/views/home_view.dart';
+import 'package:pro_build_attendance/ui/views/payment_form.dart';
 import 'package:pro_build_attendance/ui/views/payments_view.dart';
 import 'package:pro_build_attendance/ui/views/search_view.dart';
 import 'package:pro_build_attendance/ui/views/user_view.dart';
@@ -27,8 +30,10 @@ class NavigationDrawer extends StatelessWidget {
             Text("Pages"),
             DrawerTile(
               title: "Home",
+              isActive: currentRoute == HomeView.id,
               icon: Icons.home_outlined,
               activeIcon: Icons.home_rounded,
+              onTap: () => navigate(context, currentRoute, HomeView.id),
             ),
             DrawerTile(
               isActive: currentRoute == AttendanceView.id,
@@ -66,6 +71,12 @@ class NavigationDrawer extends StatelessWidget {
                   Navigator.pop(context);
               },
             ),
+            DrawerTile(
+                activeIcon: Icons.shopping_bag_rounded,
+                isActive: currentRoute == ExpensesView.id,
+                icon: Icons.shopping_bag_outlined,
+                title: "Expenses",
+                onTap: () => navigate(context, currentRoute, ExpensesView.id)),
             Divider(),
             Text("Actions"),
             DrawerTile(
@@ -98,7 +109,14 @@ class NavigationDrawer extends StatelessWidget {
                 );
               },
             ),
-            DrawerTile(title: "Record Payment", icon: Icons.attach_money),
+            DrawerTile(
+              title: "Record Payment",
+              icon: Icons.attach_money,
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => PaymentForm()));
+              },
+            ),
             Divider(),
             Text("Settings"),
             DrawerTile(
@@ -118,11 +136,24 @@ class NavigationDrawer extends StatelessWidget {
                 await context.read<LoginModel>().logout();
                 // Navigator.pushNamed(context, LoginView.id);
               },
-            )
+            ),
+            AboutListTile(
+              applicationIcon: Image.asset("no_data.png", height: 40),
+              applicationLegalese: "© ${DateTime.now().year} Aman Gupta",
+              applicationName: "Pro Build Admin",
+              applicationVersion: "1.0.3",
+            ),
           ],
         ),
       ),
     );
+  }
+
+  void navigate(BuildContext context, String currentRoute, String route) {
+    if (currentRoute != route) {
+      Navigator.pushReplacementNamed(context, route);
+    } else
+      Navigator.pop(context);
   }
 }
 

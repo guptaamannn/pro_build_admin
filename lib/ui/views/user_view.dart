@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:pro_build_attendance/core/model/invoice.dart';
 import 'package:pro_build_attendance/core/model/user.dart';
 import 'package:pro_build_attendance/core/utils/formatter.dart';
 import 'package:pro_build_attendance/core/viewModel/user_model.dart';
-import 'package:pro_build_attendance/ui/views/payment_edit_view.dart';
+import 'package:pro_build_attendance/ui/views/payment_form.dart';
 import 'package:pro_build_attendance/ui/views/user_edit_view.dart';
 import 'package:pro_build_attendance/ui/widgets/dumbbell_spinner.dart';
 import 'package:pro_build_attendance/ui/widgets/image_avatar.dart';
@@ -17,7 +18,7 @@ class UserView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var model = context.read<UserModel>();
+    UserModel model = context.read<UserModel>();
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -30,18 +31,6 @@ class UserView extends StatelessWidget {
         actions: [
           IconButton(onPressed: () {}, icon: Icon(Icons.more_vert_rounded))
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          User user = await model.editUser(userId);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => UserEditView(user: user),
-            ),
-          );
-        },
-        child: Icon(Icons.edit_outlined),
       ),
       body: StreamBuilder<User>(
         stream: model.getUserStream(userId),
@@ -58,6 +47,7 @@ class UserView extends StatelessWidget {
           }
           User user = snapshot.data!;
           return ListView(
+            // padding: EdgeInsets.symmetric(horizontal: 18),
             children: [
               Container(
                 color: Theme.of(context).colorScheme.surface,
@@ -110,118 +100,155 @@ class UserView extends StatelessWidget {
                   IconButton(
                     icon: Icon(Icons.payment_rounded),
                     onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => PaymentEditView(user)));
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => PaymentForm(user)));
                     },
                   ),
                 ],
               ),
               Divider(),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18.0, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Card(
-                      elevation: 20,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 18, vertical: 12),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Info(
-                                      type: "Phone",
-                                      data: user.phone.toString()),
+              Stack(
+                children: [
+                  Card(
+                    elevation: 20,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 18, vertical: 12),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Info(
+                                    type: "Phone", data: user.phone.toString()),
+                              ),
+                              Expanded(
+                                child: Info(
+                                    type: "E-mail",
+                                    data: user.email.toString()),
+                              )
+                            ],
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Info(
+                                    type: "Address",
+                                    data: user.address.toString()),
+                              ),
+                              Expanded(
+                                child: Info(
+                                  type: "Joined-date",
+                                  data: Formatter.fromDateTime(user.joinedDate),
                                 ),
-                                Expanded(
-                                  child: Info(
-                                      type: "E-mail",
-                                      data: user.email.toString()),
-                                )
-                              ],
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Info(
-                                      type: "Address",
-                                      data: user.address.toString()),
+                              )
+                            ],
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Row(
+                            textBaseline: TextBaseline.alphabetic,
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Info(
+                                      type: "Expiration-date",
+                                      data: Formatter.fromDateTime(user.eDate),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        DateTime? newDate =
+                                            await showDatePicker(
+                                          context: context,
+                                          initialDate: DateTime.now(),
+                                          firstDate: DateTime(2021, 02, 01),
+                                          lastDate: DateTime(2029, 01, 01),
+                                        );
+                                        if (newDate != null) {
+                                          model.updateEDate(user, newDate);
+                                        }
+                                      },
+                                      child: Text("Update"),
+                                    )
+                                  ],
                                 ),
-                                Expanded(
-                                  child: Info(
-                                    type: "Joined-date",
-                                    data:
-                                        Formatter.fromDateTime(user.joinedDate),
-                                  ),
-                                )
-                              ],
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Row(
-                              textBaseline: TextBaseline.alphabetic,
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
+                              ),
+                              Expanded(
+                                child: FutureBuilder<int>(
+                                  future: model.useAfterEnd(user),
+                                  initialData: 0,
+                                  builder: (context,
+                                          AsyncSnapshot<int> snapshot) =>
                                       Info(
-                                        type: "Expiration-date",
-                                        data:
-                                            Formatter.fromDateTime(user.eDate),
-                                      ),
-                                      TextButton(
-                                        onPressed: () async {
-                                          DateTime? newDate =
-                                              await showDatePicker(
-                                            context: context,
-                                            initialDate: DateTime.now(),
-                                            firstDate: DateTime(2021, 02, 01),
-                                            lastDate: DateTime(2029, 01, 01),
-                                          );
-                                          if (newDate != null) {
-                                            model.updateEDate(user, newDate);
-                                          }
-                                        },
-                                        child: Text("Update"),
-                                      )
-                                    ],
-                                  ),
+                                          type: "After Subscription",
+                                          data:
+                                              "${snapshot.data.toString()} days"),
                                 ),
-                                Expanded(
-                                  child: FutureBuilder<int>(
-                                    future: model.useAfterEnd(user),
-                                    initialData: 0,
-                                    builder: (context,
-                                            AsyncSnapshot<int> snapshot) =>
-                                        Info(
-                                            type: "After Subscription",
-                                            data:
-                                                "${snapshot.data.toString()} days"),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    right: 10,
+                    child: IconButton(
+                      onPressed: () async {
+                        User user = await model.editUser(userId);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => UserEditView(user: user),
+                          ),
+                        );
+                      },
+                      icon: Icon(Icons.edit_outlined),
+                    ),
+                  )
+                ],
               ),
+              SizedBox(height: 12),
+              Text("Last Transaction",
+                  style: Theme.of(context).textTheme.labelLarge),
+              FutureBuilder<Invoice?>(
+                  future: model.getLastTransaction(userId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return DumbbellSpinner();
+                    }
+                    if (snapshot.data == null || !snapshot.hasData) {
+                      return Text("No transactions found.");
+                    }
+                    return ListTile(
+                      leading: Text(
+                          Formatter.dayAndMonth(snapshot.data!.orderDate!)),
+                      title: Text(snapshot.data!.invoiceId!),
+                      subtitle: Text(Formatter.fromDateTime(
+                              snapshot.data!.order!.first.validFrom) +
+                          " ▶︎ " +
+                          Formatter.fromDateTime(
+                              snapshot.data!.order!.first.validTill)),
+                      trailing: Text("Rs " + snapshot.data!.totalAmount!),
+                      // isThreeLine: true,
+                    );
+                  }),
+              Container(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {},
+                  child: Text("View all"),
+                ),
+              )
             ],
           );
         },

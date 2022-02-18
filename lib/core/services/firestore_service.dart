@@ -11,6 +11,9 @@ class FirestoreService {
   final CollectionReference<Map<String, dynamic>> _payments =
       FirebaseFirestore.instance.collection("payments");
 
+  final CollectionReference<Map<String, dynamic>> _expenses =
+      FirebaseFirestore.instance.collection("expenses");
+
   Stream<DocumentSnapshot<Map<String, dynamic>>> attendanceStream(
           String documentId) =>
       _attendance.doc(documentId).snapshots();
@@ -135,12 +138,56 @@ class FirestoreService {
     return _payments.orderBy('orderDate', descending: true).snapshots();
   }
 
-  createInvoice(Map<String, dynamic> invoice, DateTime? eDate) async {
+  createInvoice(Map<String, dynamic> invoice, DateTime? eDate,
+      Map<String, dynamic> forUser) async {
     await _payments.doc(invoice["invoiceId"]).set(invoice);
     if (eDate != null) await updateEDate(invoice["userId"], eDate);
   }
 
   Future<void> deleteReceipt(String? invoiceId) async {
     await _payments.doc(invoiceId).delete();
+  }
+
+  Future<Map<String, dynamic>?> getLastTransaction(String userId) async {
+    QuerySnapshot<Map<String, dynamic>> document = await _payments
+        .orderBy("orderDate", descending: true)
+        .where("userId", isEqualTo: userId)
+        .limit(1)
+        .get();
+    return document.docs.first.data();
+  }
+
+  //<-------------- Expenses ---------------->
+  Stream<QuerySnapshot<Map<String, dynamic>>> expenseStream() {
+    return _expenses.orderBy('date', descending: true).snapshots();
+  }
+
+  ///Add [Expense] to collection.
+  Future<void> recordExpense(
+      Map<String, dynamic> expense, String documentId) async {
+    try {
+      await _expenses.doc(documentId).set(expense);
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  ///Delete [Expense] document from collection.
+  Future<void> deleteExpense(String? expenseId) async {
+    try {
+      await _expenses.doc(expenseId).delete();
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  ///Update [Expense] .
+  Future<void> updateExpense(
+      String? expenseId, Map<String, dynamic> document) async {
+    try {
+      await _expenses.doc(expenseId).update(document);
+    } catch (e) {
+      print(e);
+    }
   }
 }

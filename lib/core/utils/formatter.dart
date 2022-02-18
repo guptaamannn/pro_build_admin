@@ -9,7 +9,7 @@ class Formatter {
   }
 
   static String fromDateTime(DateTime? date) {
-    DateFormat formatter = DateFormat("dd/MMM/yyyy");
+    DateFormat formatter = DateFormat("dd MMM yyyy");
     return formatter.format(date!);
   }
 
@@ -59,5 +59,10 @@ class Formatter {
   static TimeOfDay stringToTimeOfDay(String tod) {
     final format = DateFormat.jm();
     return TimeOfDay.fromDateTime(format.parse(tod));
+  }
+
+  static String dayAndMonth(DateTime date) {
+    final format = DateFormat("dd - MMM");
+    return format.format(date);
   }
 }

@@ -6,48 +6,51 @@ import 'package:pro_build_attendance/core/enums/view_state.dart';
 import 'package:pro_build_attendance/core/model/invoice.dart';
 import 'package:pro_build_attendance/core/model/user.dart';
 import 'package:pro_build_attendance/core/utils/formatter.dart';
-import 'package:pro_build_attendance/core/viewModel/payment_model.dart';
+import 'package:pro_build_attendance/core/viewModel/transaction_model.dart';
 import 'package:pro_build_attendance/ui/shared/input_decoration.dart';
+import 'package:pro_build_attendance/ui/widgets/autocomplete_user_search.dart';
 import 'package:pro_build_attendance/ui/widgets/image_avatar.dart';
 import 'package:pro_build_attendance/ui/widgets/loading_overlay.dart';
 
 import 'package:provider/provider.dart';
 
-class PaymentEditView extends HookWidget {
-  final User user;
+class PaymentForm extends HookWidget {
+  final User? user;
+  final Invoice? invoice;
 
-  PaymentEditView(this.user);
+  PaymentForm([this.user, this.invoice]);
 
   final formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    final invoice = useState(
-      Invoice(
-          orderDate: DateTime.now(),
-          account: user,
-          userId: user.id,
-          mop: "Cash",
-          totalAmount: "1500",
-          order: [
-            Order(
-                description: "Gym",
-                amount: "1500",
-                validFrom: user.eDate,
-                validTill: user.eDate!.add(
-                  Duration(days: 30),
-                ))
-          ]),
-    );
+    final invoiceState = useState(invoice == null
+        ? Invoice(
+            orderDate: DateTime.now(),
+            account: user,
+            userId: user?.id,
+            mop: "Cash",
+            totalAmount: "1500",
+            order: [
+                Product(
+                    description: "Gym",
+                    amount: "1500",
+                    validFrom: user?.eDate,
+                    validTill: user?.eDate!.add(
+                      Duration(days: 30),
+                    ))
+              ])
+        : invoice!);
+    final userState = useState(user);
     final numberOfProducts = useState(1);
     final ValueNotifier<PaymentMode> modeOfPayment = useState(PaymentMode.Cash);
     final orderDateController = useTextEditingController(
-        text: Formatter.fromDateTime(invoice.value.orderDate));
+        text: Formatter.fromDateTime(invoiceState.value.orderDate));
     final totalAmount = useState('1500');
 
     return Scaffold(
       body: ModalProgressIndicator(
-        isLoading: context.watch<PaymentModel>().state == ViewState.busy,
+        isLoading: context.watch<Transaction>().state == ViewState.busy,
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
@@ -78,23 +81,42 @@ class PaymentEditView extends HookWidget {
                         var orderDate = await showDatePicker(
                           context: context,
                           initialDate: DateTime.now(),
-                          firstDate: user.joinedDate!,
+                          firstDate: user?.joinedDate ?? DateTime(2021),
                           lastDate: DateTime(2030),
                         );
                         if (orderDate != null) {
-                          invoice.value.orderDate = orderDate;
+                          invoiceState.value.orderDate = orderDate;
                           orderDateController.text =
                               Formatter.fromDateTime(orderDate);
                         }
                       },
                     ),
-                    ListTile(
-                      leading:
-                          ImageAvatar(imageUrl: user.dpUrl, name: user.name),
-                      title: Text(user.name!),
-                      subtitle: Text(user.phone!),
-                      trailing: Icon(Icons.arrow_forward_ios_rounded),
-                    ),
+                    userState.value != null || invoice != null
+                        ? ListTile(
+                            leading: CachedImageAvatar(
+                              fileName: userState.value == null
+                                  ? invoice!.userId!
+                                  : userState.value!.id!,
+                              name: userState.value == null
+                                  ? invoice!.account!.name
+                                  : userState.value!.name,
+                            ),
+                            title: Text(userState.value == null
+                                ? invoice!.account!.name!
+                                : userState.value!.name!),
+                            subtitle: Text(userState.value == null
+                                ? invoice!.account!.phone!
+                                : userState.value!.phone!),
+                            trailing: Icon(Icons.arrow_forward_ios_rounded),
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: SearchUser(
+                                onSelected: (user) {
+                                  userState.value = user;
+                                },
+                                searchUsing: 'name'),
+                          )
                   ],
                 ),
               ),
@@ -106,8 +128,8 @@ class PaymentEditView extends HookWidget {
                   (context, index) {
                     return ProductDetails(
                       index: index,
-                      invoice: invoice,
-                      user: user,
+                      invoice: invoiceState,
+                      user: userState.value,
                       totalItem: numberOfProducts,
                       totalAmount: totalAmount,
                     );
@@ -127,7 +149,7 @@ class PaymentEditView extends HookWidget {
                         TextButton(
                           onPressed: () {
                             numberOfProducts.value += 1;
-                            invoice.value.order?.add(Order());
+                            invoiceState.value.order?.add(Product());
                           },
                           child: Text("+ Item"),
                         ),
@@ -153,7 +175,7 @@ class PaymentEditView extends HookWidget {
                                   groupValue: modeOfPayment.value,
                                   onChanged: (value) {
                                     modeOfPayment.value = value!;
-                                    invoice.value.mop = value.name;
+                                    invoiceState.value.mop = value.name;
                                   },
                                 ),
                                 Text(e.name),
@@ -165,7 +187,7 @@ class PaymentEditView extends HookWidget {
                     ),
                     TextFormField(
                       decoration: getInputDecoration("Notes"),
-                      onChanged: (value) => invoice.value.notes = value,
+                      onChanged: (value) => invoiceState.value.notes = value,
                     ),
                     SizedBox(
                       height: 8,
@@ -173,13 +195,13 @@ class PaymentEditView extends HookWidget {
                     ElevatedButton(
                         onPressed: () async {
                           await context
-                              .read<PaymentModel>()
-                              .createInvoice(invoice.value);
+                              .read<Transaction>()
+                              .createInvoice(invoiceState.value);
                           Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.symmetric(vertical: 14)),
-                        child: Text("Submit"))
+                        child: Text(invoice == null ? "Submit" : "Update"))
                   ],
                 ),
               ),
@@ -192,14 +214,14 @@ class PaymentEditView extends HookWidget {
 }
 
 class ProductDetails extends HookWidget {
-  final User user;
+  final User? user;
   final int index;
   final ValueNotifier<Invoice> invoice;
   final ValueNotifier<int> totalItem;
   final ValueNotifier<String> totalAmount;
 
   ProductDetails({
-    required this.user,
+    this.user,
     required this.invoice,
     required this.index,
     required this.totalItem,
@@ -302,7 +324,8 @@ class ProductDetails extends HookWidget {
                                   onTap: () async {
                                     var range = await showDateRangePicker(
                                       context: context,
-                                      firstDate: user.joinedDate!,
+                                      firstDate:
+                                          user?.joinedDate ?? DateTime(2021),
                                       lastDate: DateTime(2030),
                                       initialDateRange: invoice.value
                                                   .order?[index].validFrom ==
@@ -341,7 +364,8 @@ class ProductDetails extends HookWidget {
                                       initialDate: validTill == null
                                           ? DateTime.now()
                                           : validTill,
-                                      firstDate: user.joinedDate!,
+                                      firstDate:
+                                          user?.joinedDate ?? DateTime(2021),
                                       lastDate: DateTime.now().add(
                                         Duration(days: 730),
                                       ),

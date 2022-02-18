@@ -5,7 +5,7 @@ class Invoice {
   DateTime? orderDate;
   String? userId;
   User? account;
-  List<Order>? order;
+  List<Product>? order;
   String? mop;
   String? notes;
   String? totalAmount;
@@ -27,9 +27,9 @@ class Invoice {
     account =
         json['account'] != null ? new User.fromUsers(json['account']) : null;
     if (json['order'] != null) {
-      order = <Order>[];
+      order = <Product>[];
       json['order'].forEach((v) {
-        order!.add(new Order.fromJson(v));
+        order!.add(new Product.fromJson(v));
       });
     }
     mop = json['mop'];
@@ -58,6 +58,19 @@ class Invoice {
     return data;
   }
 
+  Map<String, dynamic> forUser() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+
+    data["invoiceId"] = this.invoiceId;
+    data["orderDate"] = this.orderDate;
+    data["mop"] = this.mop;
+    data["notes"] = this.notes;
+    data["totalAmount"] = this.totalAmount;
+    data["order"] = this.order;
+
+    return data;
+  }
+
   String getTotal() {
     double sum = 0;
     if (order != null && order!.isNotEmpty) {
@@ -73,37 +86,15 @@ class Invoice {
   }
 }
 
-class Account {
-  String? name;
-  String? phone;
-  String? email;
-
-  Account({this.name, this.phone, this.email});
-
-  Account.fromJson(Map<String, dynamic> json) {
-    name = json['name'];
-    phone = json['phone'];
-    email = json['email'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['name'] = this.name;
-    data['phone'] = this.phone;
-    data['email'] = this.email;
-    return data;
-  }
-}
-
-class Order {
+class Product {
   String? description;
   String? amount;
   DateTime? validFrom;
   DateTime? validTill;
 
-  Order({this.description, this.amount, this.validFrom, this.validTill});
+  Product({this.description, this.amount, this.validFrom, this.validTill});
 
-  Order.fromJson(Map<String, dynamic> json) {
+  Product.fromJson(Map<String, dynamic> json) {
     description = json['decription'];
     amount = json['amount'];
     validFrom = json['validFrom'] != null ? json['validFrom'].toDate() : null;
