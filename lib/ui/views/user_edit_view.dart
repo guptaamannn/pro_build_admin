@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:pro_build_attendance/core/enums/view_state.dart';
-import 'package:pro_build_attendance/core/model/user.dart';
-import 'package:pro_build_attendance/core/utils/formatter.dart';
-import 'package:pro_build_attendance/core/viewModel/user_model.dart';
-import 'package:pro_build_attendance/ui/widgets/image_avatar_updater.dart';
-import 'package:pro_build_attendance/ui/widgets/loading_overlay.dart';
+import '/core/enums/view_state.dart';
+import '/core/model/user.dart';
+import '/core/utils/formatter.dart';
+import '/core/viewModel/user_model.dart';
+import '/ui/widgets/image_avatar_updater.dart';
+import '/ui/widgets/loading_overlay.dart';
 import 'package:provider/provider.dart';
 
 class UserEditView extends HookWidget {
@@ -25,7 +25,7 @@ class UserEditView extends HookWidget {
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
-          leading: CloseButton(),
+          leading: const CloseButton(),
           title: Text(
             user != null ? "Edit Profile" : "Create Profile",
           ),
@@ -44,7 +44,7 @@ class UserEditView extends HookWidget {
                         );
                     Navigator.pop(context);
                   },
-                  child: Text("Save"),
+                  child: const Text("Save"),
                 ),
               ),
             )
@@ -60,7 +60,7 @@ class UserEditView extends HookWidget {
                   onChange: (value) {
                     path.value = value;
                   }),
-              Divider(color: Colors.transparent),
+              const Divider(color: Colors.transparent),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Form(
@@ -69,7 +69,7 @@ class UserEditView extends HookWidget {
                     children: [
                       TextFormField(
                         decoration: InputDecoration(
-                          icon: Icon(Icons.person_outline_rounded),
+                          icon: const Icon(Icons.person_outline_rounded),
                           labelText: "Name",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8)),
@@ -86,10 +86,10 @@ class UserEditView extends HookWidget {
                           return null;
                         },
                       ),
-                      Divider(color: Colors.transparent),
+                      const Divider(color: Colors.transparent),
                       TextFormField(
                         decoration: InputDecoration(
-                          icon: Icon(Icons.phone_outlined),
+                          icon: const Icon(Icons.phone_outlined),
                           labelText: "Phone",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8)),
@@ -98,10 +98,10 @@ class UserEditView extends HookWidget {
                         onSaved: (newValue) => userState.value.phone = newValue,
                         keyboardType: TextInputType.phone,
                       ),
-                      Divider(color: Colors.transparent),
+                      const Divider(color: Colors.transparent),
                       TextFormField(
                         decoration: InputDecoration(
-                          icon: Icon(Icons.email_outlined),
+                          icon: const Icon(Icons.email_outlined),
                           labelText: "Email",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8)),
@@ -110,10 +110,10 @@ class UserEditView extends HookWidget {
                         onSaved: (newValue) => userState.value.email = newValue,
                         keyboardType: TextInputType.emailAddress,
                       ),
-                      Divider(color: Colors.transparent),
+                      const Divider(color: Colors.transparent),
                       TextFormField(
                         decoration: InputDecoration(
-                          icon: Icon(Icons.location_on_outlined),
+                          icon: const Icon(Icons.location_on_outlined),
                           labelText: "Address",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8)),
@@ -123,15 +123,13 @@ class UserEditView extends HookWidget {
                             userState.value.address = newValue,
                         keyboardType: TextInputType.streetAddress,
                       ),
-                      Divider(color: Colors.transparent),
+                      const Divider(color: Colors.transparent),
                       TextFormField(
                         readOnly: true,
                         onTap: () async {
                           DateTime? _joinedDate = await showDatePicker(
                             context: context,
-                            initialDate: userState.value.joinedDate != null
-                                ? DateTime.now()
-                                : userState.value.joinedDate!,
+                            initialDate: userState.value.joinedDate!,
                             firstDate: DateTime(2021),
                             lastDate: DateTime.now(),
                           );
@@ -140,12 +138,13 @@ class UserEditView extends HookWidget {
                           }
                         },
                         decoration: InputDecoration(
-                          icon: Icon(Icons.calendar_today_rounded),
+                          icon: const Icon(Icons.calendar_today_rounded),
                           labelText: "Joined Date",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8)),
                         ),
-                        initialValue: Formatter.fromDateTime(DateTime.now()),
+                        initialValue:
+                            Formatter.fromDateTime(userState.value.joinedDate),
                       ),
                     ],
                   ),

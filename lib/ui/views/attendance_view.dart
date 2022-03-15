@@ -1,37 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:pro_build_attendance/core/enums/view_state.dart';
-import 'package:pro_build_attendance/core/model/attendance.dart';
-import 'package:pro_build_attendance/core/model/user.dart';
-import 'package:pro_build_attendance/core/utils/formatter.dart';
-import 'package:pro_build_attendance/core/viewModel/attendance_model.dart';
-import 'package:pro_build_attendance/locator.dart';
-import 'package:pro_build_attendance/ui/views/search_view.dart';
-import 'package:pro_build_attendance/ui/views/user_view.dart';
-import 'package:pro_build_attendance/ui/widgets/autocomplete_user_search.dart';
-import 'package:pro_build_attendance/ui/widgets/bottom_navigation_bar.dart';
-import 'package:pro_build_attendance/ui/widgets/date_pill.dart';
-import 'package:pro_build_attendance/ui/widgets/dumbbell_spinner.dart';
-import 'package:pro_build_attendance/ui/widgets/error_dialog.dart';
-import 'package:pro_build_attendance/ui/widgets/image_avatar.dart';
-import 'package:pro_build_attendance/ui/widgets/loading_overlay.dart';
-import 'package:pro_build_attendance/ui/widgets/no_data_image.dart';
-import 'package:pro_build_attendance/ui/widgets/user_create_form.dart';
+import '/core/enums/view_state.dart';
+import '/core/model/attendance.dart';
+import '/core/model/user.dart';
+import '/core/utils/formatter.dart';
+import '/core/viewModel/attendance_model.dart';
+import '/locator.dart';
+import '/ui/views/search_view.dart';
+import '/ui/views/user_view.dart';
+import '/ui/widgets/autocomplete_user_search.dart';
+import '/ui/widgets/bottom_navigation_bar.dart';
+import '/ui/widgets/date_pill.dart';
+import '/ui/widgets/dumbbell_spinner.dart';
+import '/ui/widgets/error_dialog.dart';
+import '/ui/widgets/image_avatar.dart';
+import '/ui/widgets/loading_overlay.dart';
+import '/ui/widgets/no_data_image.dart';
+import '/ui/widgets/user_create_form.dart';
 
 import 'package:provider/provider.dart';
 
-class AttendanceView extends StatelessWidget {
-  static const String id = '/attendance';
-  const AttendanceView({Key? key}) : super(key: key);
+class _CustomAppBar extends StatelessWidget {
+  const _CustomAppBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    AppBar _buildCalendarAppBar(BuildContext context) {
-      return AppBar(
+    return AppBar(
+      title: const Text("Daily Records"),
+      elevation: 0,
+      actions: [
+        IconButton(
+            onPressed: () async {
+              User? result = await showSearch<User?>(
+                  context: context, delegate: CustomSearchDelegate());
+              if (result != null) {
+                Navigator.pushNamed(context, UserView.id, arguments: result.id);
+              }
+            },
+            icon: const Icon(Icons.search)),
+        IconButton(
+          onPressed: () async {
+            DateTime? selectedDate = await showDatePicker(
+              context: context,
+              initialDate: context.read<AttendanceModel>().getSelectedDate(),
+              firstDate: DateTime(2021),
+              lastDate: DateTime.now(),
+            );
+            if (selectedDate != null) {
+              context.read<AttendanceModel>().updateViewDate(selectedDate);
+            }
+          },
+          icon: const Icon(Icons.calendar_today_rounded),
+        ),
+      ],
+      bottom: AppBar(
         elevation: 0,
         automaticallyImplyLeading: false,
         toolbarHeight: 90,
-        title: Container(
+        title: SizedBox(
           height: 65,
           width: double.infinity,
           child: ListView.builder(
@@ -50,84 +76,63 @@ class AttendanceView extends StatelessWidget {
             },
           ),
         ),
-      );
-    }
+      ),
+    );
+  }
+}
 
-    AppBar _buildAppBar(BuildContext context) {
-      return AppBar(
-        title: Text("Daily Records"),
-        elevation: 0,
-        actions: [
-          IconButton(
-              onPressed: () async {
-                User? result = await showSearch<User?>(
-                    context: context, delegate: CustomSearchDelegate());
-                if (result != null) {
-                  Navigator.pushNamed(context, UserView.id,
-                      arguments: result.id);
-                }
+class _CustomFAB extends StatelessWidget {
+  final AttendanceModel viewModel;
+  const _CustomFAB({Key? key, required this.viewModel}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        FloatingActionButton(
+          backgroundColor: Theme.of(context).colorScheme.tertiary,
+          heroTag: "something",
+          onPressed: () async {
+            await showModalBottomSheet(
+              isScrollControlled: true,
+              useRootNavigator: true,
+              context: context,
+              builder: (context) {
+                return const UserAttendanceAdd();
               },
-              icon: Icon(Icons.search)),
-          IconButton(
-            onPressed: () async {
-              DateTime? selectedDate = await showDatePicker(
-                context: context,
-                initialDate: context.read<AttendanceModel>().getSelectedDate(),
-                firstDate: DateTime(2021),
-                lastDate: DateTime.now(),
-              );
-              if (selectedDate != null) {
-                context.read<AttendanceModel>().updateViewDate(selectedDate);
-              }
-            },
-            icon: Icon(Icons.calendar_today_rounded),
-          ),
-        ],
-        bottom: _buildCalendarAppBar(context),
-      );
-    }
+            );
+          },
+          child: const Icon(Icons.person_add),
+          mini: true,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        const SizedBox(height: 12),
+        FloatingActionButton(
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (context) {
+                return AttendanceForm(viewModel);
+              },
+            );
+            print("Add User");
+          },
+          child: const Icon(Icons.add),
+        ),
+      ],
+    );
+  }
+}
 
-    Widget _buildFloatingActionButton(
-        BuildContext context, AttendanceModel model) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton(
-            backgroundColor: Theme.of(context).colorScheme.tertiary,
-            heroTag: "something",
-            onPressed: () async {
-              await showModalBottomSheet(
-                isScrollControlled: true,
-                useRootNavigator: true,
-                context: context,
-                builder: (context) {
-                  return UserAttendanceAdd();
-                },
-              );
-            },
-            child: Icon(Icons.person_add),
-            mini: true,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          SizedBox(height: 12),
-          FloatingActionButton(
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                builder: (context) {
-                  return AttendanceForm(model);
-                },
-              );
-              print("Add User");
-            },
-            child: Icon(Icons.add),
-          ),
-        ],
-      );
-    }
+class AttendanceView extends StatelessWidget {
+  static const String id = '/attendance';
+  const AttendanceView({Key? key}) : super(key: key);
 
+  @override
+  Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => locator<AttendanceModel>())
@@ -135,42 +140,42 @@ class AttendanceView extends StatelessWidget {
       child: Consumer<AttendanceModel>(
         builder: (context, viewModel, child) {
           return Scaffold(
-            appBar: _buildAppBar(context),
-            // drawer: NavigationDrawer(
-            //   currentRoute: AttendanceView.id,
-            // ),
+            appBar: PreferredSize(
+              preferredSize: AppBar().preferredSize * 2.5,
+              child: const _CustomAppBar(),
+            ),
             bottomNavigationBar: Hero(
                 tag: "nav",
                 child: CustomBottomNavigation(
                   currentRoute: id,
                 )),
-            floatingActionButton:
-                _buildFloatingActionButton(context, viewModel),
+            floatingActionButton: _CustomFAB(viewModel: viewModel),
             body: ModalProgressIndicator(
               isLoading: viewModel.state == ViewState.busy,
               child: StreamBuilder<Attendance>(
                 stream: viewModel.attendanceStream(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: DumbbellSpinner());
+                    return const Center(child: DumbbellSpinner());
                   }
+
+                  Attendance? model = snapshot.data;
+                  viewModel.setCurrentAttendance(model);
+
                   if (snapshot.data == null ||
                       !snapshot.hasData ||
                       snapshot.data!.userIds!.isEmpty) {
-                    return Center(child: NoDataSign());
+                    return const Center(child: NoDataSign());
                   }
                   if (snapshot.hasError) {
-                    print("Somethings is wrong");
+                    print("Something is wrong");
                   }
-
-                  Attendance model = snapshot.data!;
-                  viewModel.setCurrentAttendance(model);
 
                   return ListView.builder(
                     addAutomaticKeepAlives: true,
                     cacheExtent: 80,
                     itemExtent: 85,
-                    itemCount: model.userIds!.length,
+                    itemCount: model!.userIds!.length,
                     reverse: true,
                     itemBuilder: (context, index) {
                       if (model.users?.first.attendTime != null) {
@@ -225,18 +230,20 @@ class AttendanceView extends StatelessWidget {
                                         onPressed: () {
                                           Navigator.pop(context);
                                         },
-                                        child: Text("Cancel")),
+                                        child: const Text("Cancel")),
                                     TextButton(
                                       onPressed: () async {
                                         await viewModel.deleteAttendee(
                                             user: _user);
                                         Navigator.pop(context);
                                       },
-                                      child: Text("Delete",
-                                          style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .error)),
+                                      child: Text(
+                                        "Delete",
+                                        style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .error),
+                                      ),
                                     ),
                                   ],
                                 );
@@ -296,7 +303,7 @@ class AttendanceListTile extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
+                SizedBox(
                   width: 60,
                   child: Text(
                     showTime == null || showTime == false
@@ -304,7 +311,7 @@ class AttendanceListTile extends StatelessWidget {
                         : "",
                   ),
                 ),
-                VerticalDivider(
+                const VerticalDivider(
                   thickness: 2,
                 ),
               ],
@@ -317,12 +324,13 @@ class AttendanceListTile extends StatelessWidget {
               onLongPress: onLongPress == null ? null : () => onLongPress!(),
               child: Container(
                 height: 60,
-                padding: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
                 decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surfaceVariant,
                     borderRadius: BorderRadius.circular(8),
                     gradient: isSubExpired
-                        ? LinearGradient(stops: [
+                        ? LinearGradient(stops: const [
                             0.01,
                             0.01
                           ], colors: [
@@ -335,7 +343,7 @@ class AttendanceListTile extends StatelessWidget {
                         color: Colors.black45.withOpacity(0.3),
                         spreadRadius: 2,
                         blurRadius: 9,
-                        offset: Offset(3, 3),
+                        offset: const Offset(3, 3),
                       )
                     ]),
                 child: Row(
@@ -350,7 +358,7 @@ class AttendanceListTile extends StatelessWidget {
                         fileName: user.id!,
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 10,
                     ),
                     Flexible(
@@ -382,14 +390,14 @@ class AttendanceListTile extends StatelessWidget {
 class AttendanceForm extends HookWidget {
   final AttendanceModel model;
 
-  AttendanceForm(this.model);
+  const AttendanceForm(this.model, {Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final ValueNotifier<TimeOfDay?> timeState = useState(null);
     final ValueNotifier<String> filterBy = useState('name');
 
     void onSelected(User user) async {
-      print(user.name);
       try {
         await model.addUserToAttendance(
           user: user,
@@ -399,7 +407,6 @@ class AttendanceForm extends HookWidget {
         );
         Navigator.pop(context);
       } catch (e) {
-        print(e);
         if (e == 'duplicate-entry') {
           showDialog(
             context: context,
@@ -434,22 +441,22 @@ class AttendanceForm extends HookWidget {
           Row(
             children: [
               ChoiceChip(
-                label: Text("Name"),
+                label: const Text("Name"),
                 selected: filterBy.value == 'name',
                 onSelected: (value) => filterBy.value = 'name',
-                avatar: Icon(
+                avatar: const Icon(
                   Icons.person_outline_rounded,
                   size: 20,
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               ChoiceChip(
-                label: Text("Phone"),
+                label: const Text("Phone"),
                 selected: filterBy.value == 'phone',
                 onSelected: (value) => filterBy.value = 'phone',
-                avatar: Icon(Icons.phone_enabled_outlined, size: 20),
+                avatar: const Icon(Icons.phone_enabled_outlined, size: 20),
               ),
-              Spacer(),
+              const Spacer(),
               IconButton(
                 onPressed: () async {
                   TimeOfDay? time = await showTimePicker(
@@ -458,7 +465,7 @@ class AttendanceForm extends HookWidget {
                     timeState.value = time;
                   }
                 },
-                icon: Icon(Icons.timer_rounded),
+                icon: const Icon(Icons.timer_rounded),
               ),
             ],
           ),

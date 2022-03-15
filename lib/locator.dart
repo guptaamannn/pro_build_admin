@@ -1,10 +1,11 @@
 import 'package:get_it/get_it.dart';
-import 'package:pro_build_attendance/core/services/authentication_service.dart';
-import 'package:pro_build_attendance/core/services/firestore_service.dart';
-import 'package:pro_build_attendance/core/services/storage_service.dart';
-import 'package:pro_build_attendance/core/viewModel/attendance_model.dart';
-import 'package:pro_build_attendance/core/viewModel/login_model.dart';
-import 'package:pro_build_attendance/core/viewModel/user_model.dart';
+
+import 'core/services/authentication_service.dart';
+import 'core/services/firestore_service.dart';
+import 'core/services/storage_service.dart';
+import 'core/viewModel/attendance_model.dart';
+import 'core/viewModel/login_model.dart';
+import 'core/viewModel/user_model.dart';
 
 GetIt locator = GetIt.instance;
 

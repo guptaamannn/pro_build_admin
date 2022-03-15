@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pro_build_attendance/core/enums/view_state.dart';
-import 'package:pro_build_attendance/core/viewModel/user_model.dart';
-import 'package:pro_build_attendance/ui/widgets/dumbbell_spinner.dart';
+import '/core/enums/view_state.dart';
+import '/core/viewModel/user_model.dart';
+import '/ui/widgets/dumbbell_spinner.dart';
 import 'package:provider/provider.dart';
 
 import 'error_dialog.dart';
@@ -10,7 +10,7 @@ import 'image_avatar_updater.dart';
 class UserAttendanceAdd extends StatefulWidget {
   // final AttendanceViewModel model;
   final List<String>? usersList;
-  UserAttendanceAdd({this.usersList});
+  const UserAttendanceAdd({key, this.usersList}) : super(key: key);
 
   @override
   State<UserAttendanceAdd> createState() => _UserAttendanceAddState();
@@ -31,7 +31,7 @@ class _UserAttendanceAddState extends State<UserAttendanceAdd> {
       padding: EdgeInsets.fromLTRB(
           12, 20, 12, MediaQuery.of(context).viewInsets.bottom),
       child: context.watch<UserModel>().state == ViewState.busy
-          ? Center(
+          ? const Center(
               child: DumbbellSpinner(),
             )
           : Form(
@@ -47,7 +47,7 @@ class _UserAttendanceAddState extends State<UserAttendanceAdd> {
                     },
                     path: formData["imagePath"],
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   TextFormField(
@@ -70,7 +70,7 @@ class _UserAttendanceAddState extends State<UserAttendanceAdd> {
                       formData["name"] = value;
                     },
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -95,7 +95,7 @@ class _UserAttendanceAddState extends State<UserAttendanceAdd> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Expanded(
                         flex: 5,
                         child: TextFormField(
@@ -141,7 +141,7 @@ class _UserAttendanceAddState extends State<UserAttendanceAdd> {
                         }
                       }
                     },
-                    child: Text("Add"),
+                    child: const Text("Add"),
                   ),
                 ],
               ),

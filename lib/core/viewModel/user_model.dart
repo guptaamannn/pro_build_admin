@@ -2,14 +2,15 @@ import 'dart:io';
 
 import 'package:nanoid/async.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:pro_build_attendance/core/enums/view_state.dart';
-import 'package:pro_build_attendance/core/model/invoice.dart';
-import 'package:pro_build_attendance/core/model/user.dart';
-import 'package:pro_build_attendance/core/services/firestore_service.dart';
-import 'package:pro_build_attendance/core/services/storage_service.dart';
-import 'package:pro_build_attendance/core/services/url_launch_service.dart';
-import 'package:pro_build_attendance/core/viewModel/base_model.dart';
-import 'package:pro_build_attendance/locator.dart';
+import 'package:pro_build_admin/core/model/user_record.dart';
+import '/core/enums/view_state.dart';
+import '/core/model/invoice.dart';
+import '/core/model/user.dart';
+import '/core/services/firestore_service.dart';
+import '/core/services/storage_service.dart';
+import '/core/services/url_launch_service.dart';
+import '/core/viewModel/base_model.dart';
+import '/locator.dart';
 
 class UserModel extends BaseModel {
   final FirestoreService _firestore = locator<FirestoreService>();
@@ -83,12 +84,12 @@ class UserModel extends BaseModel {
       users = result.docs.map((e) => User.fromUsers(e.data()));
     }
     if (users.isNotEmpty) {
-      users.forEach((element) {
+      for (var element in users) {
         updateCachedUsers(element);
-      });
+      }
       return users;
     }
-    return Iterable.empty();
+    return const Iterable.empty();
   }
 
   Future<String?> downloadUserDp(String fileName) async {
@@ -121,8 +122,6 @@ class UserModel extends BaseModel {
   void mailUser(User user) async {
     if (user.email != null && user.email != "" && user.email!.isNotEmpty) {
       UrlService().mail(user.email!);
-    } else {
-      print("No Email");
     }
   }
 
@@ -136,8 +135,9 @@ class UserModel extends BaseModel {
     if (user.eDate!.isBefore(DateTime.now())) {
       int days = await _firestore.daysAfterExp(user.id!, user.eDate!);
       return days;
-    } else
+    } else {
       return 0;
+    }
   }
 
   String _sortBy = 'name';
@@ -176,7 +176,7 @@ class UserModel extends BaseModel {
     setState(ViewState.idle);
   }
 
-  List<User> _users = [];
+  final List<User> _users = [];
 
   List<User> get getUsers => _users;
 
@@ -199,5 +199,19 @@ class UserModel extends BaseModel {
       return invoice;
     }
     return null;
+  }
+
+  Future<UserRecord?> getUserRecords(String userId) async {
+    Map<String, dynamic>? data =
+        await _firestore.getUserRecords(userId, "2022");
+    if (data != null) {
+      UserRecord record = UserRecord.fromJson(data);
+      return record;
+    }
+    return null;
+  }
+
+  Future<void> refreshDp(String userId) async {
+    await _storage.downloadDp(userId);
   }
 }

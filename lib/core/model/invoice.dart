@@ -1,4 +1,4 @@
-import 'package:pro_build_attendance/core/model/user.dart';
+import '/core/model/user.dart';
 
 class Invoice {
   String? invoiceId;
@@ -8,7 +8,7 @@ class Invoice {
   List<Product>? order;
   String? mop;
   String? notes;
-  String? totalAmount;
+  double? totalAmount;
 
   Invoice(
       {this.invoiceId,
@@ -24,12 +24,11 @@ class Invoice {
     invoiceId = json['invoiceId'];
     orderDate = json['orderDate'].toDate();
     userId = json['userId'];
-    account =
-        json['account'] != null ? new User.fromUsers(json['account']) : null;
+    account = json['account'] != null ? User.fromUsers(json['account']) : null;
     if (json['order'] != null) {
       order = <Product>[];
       json['order'].forEach((v) {
-        order!.add(new Product.fromJson(v));
+        order!.add(Product.fromJson(v));
       });
     }
     mop = json['mop'];
@@ -38,57 +37,55 @@ class Invoice {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['invoiceId'] = this.invoiceId;
-    data['orderDate'] = this.orderDate;
-    data['userId'] = this.userId;
-    if (this.account != null) {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['invoiceId'] = invoiceId;
+    data['orderDate'] = orderDate;
+    data['userId'] = userId;
+    if (account != null) {
       data['account'] = {
-        'name': this.account!.name,
-        'phone': this.account!.phone,
-        'email': this.account!.email,
+        'name': account!.name,
+        'phone': account!.phone,
+        'email': account!.email,
       };
     }
-    if (this.order != null) {
-      data['order'] = this.order!.map((v) => v.toJson()).toList();
+    if (order != null) {
+      data['order'] = order!.map((v) => v.toJson()).toList();
     }
-    data['mop'] = this.mop;
-    data['notes'] = this.notes;
+    data['mop'] = mop;
+    data['notes'] = notes;
     data['totalAmount'] = getTotal();
     return data;
   }
 
   Map<String, dynamic> forUser() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
 
-    data["invoiceId"] = this.invoiceId;
-    data["orderDate"] = this.orderDate;
-    data["mop"] = this.mop;
-    data["notes"] = this.notes;
-    data["totalAmount"] = this.totalAmount;
-    data["order"] = this.order;
+    data["invoiceId"] = invoiceId;
+    data["orderDate"] = orderDate;
+    data["mop"] = mop;
+    data["notes"] = notes;
+    data["totalAmount"] = totalAmount;
+    data["order"] = order;
 
     return data;
   }
 
-  String getTotal() {
+  double getTotal() {
     double sum = 0;
     if (order != null && order!.isNotEmpty) {
-      order!.forEach(
-        (element) {
-          if (element.amount != null && element.amount!.isNotEmpty) {
-            sum += double.parse(element.amount!);
-          }
-        },
-      );
+      for (var element in order!) {
+        if (element.amount != null) {
+          sum += element.amount!;
+        }
+      }
     }
-    return sum.toString();
+    return sum;
   }
 }
 
 class Product {
   String? description;
-  String? amount;
+  double? amount;
   DateTime? validFrom;
   DateTime? validTill;
 
@@ -97,16 +94,26 @@ class Product {
   Product.fromJson(Map<String, dynamic> json) {
     description = json['decription'];
     amount = json['amount'];
-    validFrom = json['validFrom'] != null ? json['validFrom'].toDate() : null;
-    validTill = json['validTill'] != null ? json['validTill'].toDate() : null;
+    if (json['validFrom'] != null) {
+      validFrom = json['validFrom'].toDate();
+    } else {
+      validFrom = null;
+    }
+    if (json['validTill'] != null) {
+      validTill = json['validTill'].toDate();
+    } else {
+      validTill = null;
+    }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['decription'] = this.description;
-    data['amount'] = this.amount;
-    data['validFrom'] = this.validFrom;
-    data['validTill'] = this.validTill;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['decription'] = description;
+    data['amount'] = amount;
+    if (description != "gym" || description != "locker") {
+      data['validFrom'] = validFrom;
+      data['validTill'] = validTill;
+    }
     return data;
   }
 }

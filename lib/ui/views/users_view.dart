@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:pro_build_attendance/core/model/user.dart';
-import 'package:pro_build_attendance/core/viewModel/user_model.dart';
-import 'package:pro_build_attendance/ui/views/search_view.dart';
-import 'package:pro_build_attendance/ui/views/user_edit_view.dart';
-import 'package:pro_build_attendance/ui/views/user_view.dart';
-import 'package:pro_build_attendance/ui/widgets/bottom_navigation_bar.dart';
-import 'package:pro_build_attendance/ui/widgets/dumbbell_spinner.dart';
-import 'package:pro_build_attendance/ui/widgets/image_avatar.dart';
+import '/core/model/user.dart';
+import '/core/viewModel/user_model.dart';
+import '/ui/views/search_view.dart';
+import '/ui/views/user_edit_view.dart';
+import '/ui/views/user_view.dart';
+import '/ui/widgets/bottom_navigation_bar.dart';
+import '/ui/widgets/dumbbell_spinner.dart';
+import '/ui/widgets/image_avatar.dart';
 
 import 'package:provider/provider.dart';
 
@@ -36,7 +36,7 @@ class UsersView extends StatelessWidget {
                               )));
                 }
               },
-              icon: Icon(Icons.search_rounded))
+              icon: const Icon(Icons.search_rounded))
         ],
         bottom: AppBar(
           title: const Text("Users"),
@@ -48,18 +48,18 @@ class UsersView extends StatelessWidget {
           Navigator.push(
               context, MaterialPageRoute(builder: (context) => UserEditView()));
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       body: StreamBuilder<Iterable<User>>(
         stream: context.read<UserModel>().getUsersStream(),
         builder:
             (BuildContext context, AsyncSnapshot<Iterable<User>> snapshot) {
           if (snapshot.hasError) {
-            return Text('Something went Wrong');
+            return const Text('Something went Wrong');
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: DumbbellSpinner(),
             );
           }
@@ -90,7 +90,7 @@ class UsersView extends StatelessWidget {
                             name: _user.name,
                             key: Key(_user.id!),
                           ),
-                          SizedBox(width: 12),
+                          const SizedBox(width: 12),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

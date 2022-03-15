@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:pro_build_attendance/core/viewModel/login_model.dart';
-import 'package:pro_build_attendance/ui/views/attendance_view.dart';
-import 'package:pro_build_attendance/ui/views/login_view.dart';
-import 'package:pro_build_attendance/ui/widgets/dumbbell_spinner.dart';
+import '/core/viewModel/login_model.dart';
+import '/ui/views/attendance_view.dart';
+import '/ui/views/login_view.dart';
+import '/ui/widgets/dumbbell_spinner.dart';
 import 'package:provider/provider.dart';
 
 import '../../locator.dart';
@@ -14,7 +14,7 @@ class AuthWrapperView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return authWrapper(context, LoginView(), AttendanceView());
+    return authWrapper(context, const LoginView(), const AttendanceView());
   }
 }
 
@@ -33,7 +33,7 @@ Widget authWrapper(BuildContext context, Widget loginPage, Widget homePage) {
               return homePage;
             }
           }
-          return Material(
+          return const Material(
             child: Center(
               child: DumbbellSpinner(),
             ),

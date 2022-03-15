@@ -1,7 +1,7 @@
 class Expense {
   DateTime? date;
   String? type;
-  int? amount;
+  double? amount;
   String? source;
   String? notes;
   String? expenseId;
@@ -24,13 +24,13 @@ class Expense {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['date'] = this.date;
-    data['type'] = this.type;
-    data['amount'] = this.amount;
-    data['source'] = this.source;
-    data['notes'] = this.notes;
-    data['expenseId'] = this.expenseId;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['date'] = date;
+    data['type'] = type;
+    data['amount'] = amount;
+    data['source'] = source;
+    data['notes'] = notes;
+    data['expenseId'] = expenseId;
     return data;
   }
 }

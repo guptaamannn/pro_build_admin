@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pro_build_attendance/core/enums/view_state.dart';
-import 'package:pro_build_attendance/core/viewModel/login_model.dart';
-import 'package:pro_build_attendance/locator.dart';
-import 'package:pro_build_attendance/ui/widgets/loading_overlay.dart';
+import '/core/enums/view_state.dart';
+import '/core/viewModel/login_model.dart';
+import '/locator.dart';
+import '/ui/widgets/loading_overlay.dart';
 import 'package:provider/provider.dart';
 
 class LoginView extends StatefulWidget {
@@ -15,8 +15,8 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void dispose() {
@@ -35,18 +35,26 @@ class _LoginViewState extends State<LoginView> {
             isLoading: model.state == ViewState.busy,
             child: Container(
               height: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 20, horizontal: 18),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 18),
+              child: ListView(
                 children: [
-                  Text(
-                    "Sign in",
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline1!
-                        .copyWith(fontSize: 60),
+                  Image.asset(
+                    "no_data.png",
+                    height: 150,
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Sign in",
+                        style: Theme.of(context)
+                            .textTheme
+                            .headline1!
+                            .copyWith(fontSize: 60),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
                   Form(
                     key: _formKey,
                     child: Column(
@@ -67,7 +75,7 @@ class _LoginViewState extends State<LoginView> {
                             return null;
                           },
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         TextFormField(
                           controller: _passwordController,
                           decoration: InputDecoration(
@@ -92,7 +100,7 @@ class _LoginViewState extends State<LoginView> {
                             }
                           },
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         TextButton(
                             onPressed: () async {
                               if (_formKey.currentState!.validate()) {
@@ -100,9 +108,15 @@ class _LoginViewState extends State<LoginView> {
                                   _emailController.text,
                                   _passwordController.text,
                                 );
+                                if (result != 'success') {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(
+                                    content: Text(result),
+                                  ));
+                                }
                               }
                             },
-                            child: Text("Log in"))
+                            child: const Text("Log in"))
                       ],
                     ),
                   )

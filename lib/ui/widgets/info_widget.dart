@@ -8,16 +8,14 @@ class Info extends StatelessWidget {
       : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(type, style: Theme.of(context).textTheme.caption),
-          SizedBox(height: 5),
-          SelectableText(data),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(type, style: Theme.of(context).textTheme.caption),
+        const SizedBox(height: 5),
+        SelectableText(data),
+      ],
     );
   }
 }

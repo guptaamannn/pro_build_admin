@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pro_build_attendance/core/model/user.dart';
+import '/core/model/user.dart';
 
 class FirestoreService {
   final CollectionReference<Map<String, dynamic>> _users =
@@ -27,8 +27,8 @@ class FirestoreService {
       {String? sortBy, bool? sortByDescending}) {
     return _users
         .orderBy(
-          sortBy == null ? "name" : sortBy,
-          descending: sortByDescending == null ? false : sortByDescending,
+          sortBy ?? "name",
+          descending: sortByDescending ?? false,
         )
         .snapshots();
   }
@@ -39,7 +39,7 @@ class FirestoreService {
   }
 
   Future<void> createUser(Map<String, dynamic> data) async {
-    await _users.doc(data["id"]).set(data).catchError((e) => print(e));
+    await _users.doc(data["id"]).set(data);
   }
 
   Future<void> createAttendance(
@@ -53,6 +53,19 @@ class FirestoreService {
       "users": [user.toAttendance()],
       "userIds": [user.id],
     });
+  }
+
+  Future<void> addUserRecord(
+      User user, Map<String, dynamic> record, String year) async {
+    try {
+      await _users.doc(user.id).collection("records").doc(year).update({
+        "days": FieldValue.arrayUnion([record])
+      });
+    } catch (e) {
+      await _users.doc(user.id).collection("records").doc(year).set({
+        "days": [record]
+      });
+    }
   }
 
   Future<void> updateAttendance(
@@ -81,7 +94,7 @@ class FirestoreService {
     required String documentId,
     required User user,
   }) async {
-    _attendance.doc(documentId).update({
+    await _attendance.doc(documentId).update({
       "users": FieldValue.arrayRemove([
         user.attendTime == null
             ? {
@@ -92,6 +105,13 @@ class FirestoreService {
             : user.toAttendance(),
       ]),
       "userIds": FieldValue.arrayRemove([user.id])
+    });
+  }
+
+  Future<void> removeUserDailyRecord(
+      User user, String year, Map<String, dynamic> record) async {
+    await _users.doc(user.id).collection("records").doc(year).update({
+      "days": FieldValue.arrayRemove([record])
     });
   }
 
@@ -136,6 +156,13 @@ class FirestoreService {
   //<--------------- Payments -------------------->
   Stream<QuerySnapshot<Map<String, dynamic>>> invoiceStream() {
     return _payments.orderBy('orderDate', descending: true).snapshots();
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> userInvoiceStream(String userId) {
+    return _payments
+        .where("userId", isEqualTo: userId)
+        .orderBy('orderDate', descending: true)
+        .snapshots();
   }
 
   createInvoice(Map<String, dynamic> invoice, DateTime? eDate,
@@ -188,6 +215,17 @@ class FirestoreService {
       await _expenses.doc(expenseId).update(document);
     } catch (e) {
       print(e);
+    }
+  }
+
+  Future<Map<String, dynamic>?> getUserRecords(
+      String userId, String year) async {
+    DocumentSnapshot<Map<String, dynamic>> result =
+        await _users.doc(userId).collection("records").doc(year).get();
+    if (result.exists) {
+      return result.data();
+    } else {
+      return null;
     }
   }
 }

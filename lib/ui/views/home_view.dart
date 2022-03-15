@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pro_build_attendance/ui/widgets/bottom_navigation_bar.dart';
+import '/ui/widgets/bottom_navigation_bar.dart';
+import 'payment_form.dart';
 
 class HomeView extends StatelessWidget {
   static const String id = "/home";
@@ -14,7 +15,17 @@ class HomeView extends StatelessWidget {
           child: CustomBottomNavigation(
             currentRoute: id,
           )),
-      body: Center(child: const Text("Home Page")),
+      body: const Center(child: Text("Hello World")),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const PaymentForm(),
+              ));
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

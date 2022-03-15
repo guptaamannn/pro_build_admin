@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:pro_build_attendance/core/viewModel/user_model.dart';
-import 'package:pro_build_attendance/locator.dart';
+import '/core/viewModel/user_model.dart';
+import '/locator.dart';
 
 class CachedImageAvatar extends StatelessWidget {
   final String fileName;
@@ -14,7 +14,7 @@ class CachedImageAvatar extends StatelessWidget {
       {Key? key, required this.fileName, this.name, this.radius, this.hasDp})
       : super(key: key);
 
-  var model = locator<UserModel>();
+  final model = locator<UserModel>();
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +25,12 @@ class CachedImageAvatar extends StatelessWidget {
       builder: (context, AsyncSnapshot<String?> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return CircleAvatar(
+            radius: radius,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 Text(name!.split(" ")[0][0] + name!.split(" ")[1][0]),
-                CircularProgressIndicator(),
+                const CircularProgressIndicator(),
               ],
             ),
           );
@@ -37,7 +38,11 @@ class CachedImageAvatar extends StatelessWidget {
 
         if (snapshot.data == null || snapshot.hasError) {
           return CircleAvatar(
-            child: Text(name!.split(" ")[0][0] + name!.split(" ")[1][0]),
+            radius: radius,
+            child: Text(
+              name!.split(" ")[0][0] + name!.split(" ")[1][0],
+              style: TextStyle(fontSize: radius != null ? radius! / 2 : null),
+            ),
           );
         }
 

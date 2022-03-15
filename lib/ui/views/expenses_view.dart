@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:pro_build_attendance/core/model/expense.dart';
-import 'package:pro_build_attendance/core/utils/formatter.dart';
-import 'package:pro_build_attendance/core/viewModel/transaction_model.dart';
-import 'package:pro_build_attendance/ui/views/expense_form.dart';
-import 'package:pro_build_attendance/ui/widgets/bottom_navigation_bar.dart';
-import 'package:pro_build_attendance/ui/widgets/delete_dialog.dart';
-import 'package:pro_build_attendance/ui/widgets/dumbbell_spinner.dart';
+import '/core/model/expense.dart';
+import '/core/utils/formatter.dart';
+import '/core/viewModel/transaction_model.dart';
+import '/ui/views/expense_form.dart';
+import '/ui/widgets/bottom_navigation_bar.dart';
+import '/ui/widgets/delete_dialog.dart';
+import '/ui/widgets/dumbbell_spinner.dart';
 import 'package:provider/provider.dart';
 
 class ExpensesView extends StatelessWidget {
@@ -18,7 +18,7 @@ class ExpensesView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Pro Build"),
-        actions: [
+        actions: const [
           Icon(Icons.search),
           SizedBox(width: 12),
           Icon(Icons.sort),
@@ -33,23 +33,23 @@ class ExpensesView extends StatelessWidget {
       bottomNavigationBar:
           Hero(tag: "nav", child: CustomBottomNavigation(currentRoute: id)),
       floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
+          child: const Icon(Icons.add),
           onPressed: () async {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => ExpenseForm()));
+                MaterialPageRoute(builder: (context) => const ExpenseForm()));
           }),
       body: SafeArea(
         child: StreamBuilder<Iterable<Expense>>(
             stream: model.expenseStream(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: DumbbellSpinner());
+                return const Center(child: DumbbellSpinner());
               }
               if (snapshot.data == null ||
                   !snapshot.hasData ||
                   snapshot.hasError ||
-                  snapshot.data!.length == 0) {
-                return Center(child: const Text("No data available."));
+                  snapshot.data!.isEmpty) {
+                return const Center(child: Text("No data available."));
               }
 
               return ListView.builder(
@@ -58,16 +58,17 @@ class ExpensesView extends StatelessWidget {
                   Expense expense = snapshot.data!.toList()[index];
                   return ListTile(
                     leading: Container(
-                        padding: EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color:
                               Theme.of(context).colorScheme.secondaryContainer,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(model.getExpenseIcon(expense.type!))),
-                    title: Text(expense.type!),
+                    title: Text(
+                        "${expense.type![0].toUpperCase()}${expense.type!.substring(1)}"),
                     subtitle: Text(expense.notes == null
-                        ? expense.source!
+                        ? "${expense.source![0].toUpperCase()}${expense.source!.substring(1)}"
                         : expense.notes!),
                     trailing: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -77,7 +78,7 @@ class ExpensesView extends StatelessWidget {
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                         Text(
-                          "Rs ${expense.amount}",
+                          "Rs ${expense.amount.toString()}",
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
                       ],
@@ -116,7 +117,8 @@ class ExpensesView extends StatelessWidget {
                                               context,
                                               MaterialPageRoute(
                                                   builder: (context) =>
-                                                      ExpenseForm(expense)));
+                                                      ExpenseForm(
+                                                          expense: expense)));
                                           break;
                                         case 'delete':
                                           await showDialog(
@@ -132,14 +134,14 @@ class ExpensesView extends StatelessWidget {
                                               });
                                       }
                                     },
-                                    child: Icon(Icons.more_vert_rounded),
+                                    child: const Icon(Icons.more_vert_rounded),
                                     itemBuilder: (context) {
                                       return [
-                                        PopupMenuItem(
+                                        const PopupMenuItem(
                                           child: Text("Edit"),
                                           value: "edit",
                                         ),
-                                        PopupMenuItem(
+                                        const PopupMenuItem(
                                           child: Text("Delete"),
                                           value: "delete",
                                         )

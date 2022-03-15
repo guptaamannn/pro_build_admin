@@ -11,22 +11,22 @@ Pro build admin app is a custom app built using firebase and flutter to manage u
 ---
 # Roadmap
 
-# v 1.0.4 - Transactions (in-progress)
+# v 1.0.4 - Transactions (complete)
 ### Goals:
 - Build a complete transactions system.
 - Design a new tile to show transaction details in a list.
 - Proper state-management for payment form.
 
-# v 1.0.5 - Optimization
+# v 1.0.5 - Authentication
+### Goals:
+- Change app authentication to phone authentication.
+- Link firebase user to user data in cloud firestore.
+
+# v 1.0.6 - Optimization
 ### Goals:
 - Make users, payments, and expenses list lazy load data from firebase.
 - Limit the read count to around 12.
 - Streamline navigation around the app.
-
-# v 1.0.6 - Authentication
-### Goals:
-- Change app authentication to phone authentication.
-- Link firebase user to user data in cloud firestore.
 
 # v 1.0.7 - Leaderboards
 ### Goals:

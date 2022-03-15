@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:pro_build_attendance/ui/widgets/dumbbell_spinner.dart';
+import '/ui/widgets/dumbbell_spinner.dart';
 
 class ModalProgressIndicator extends StatelessWidget {
   const ModalProgressIndicator({
+    key,
     required this.child,
     required this.isLoading,
-  });
+  }) : super(key: key);
 
   final bool isLoading;
   final Widget child;
@@ -18,7 +19,7 @@ class ModalProgressIndicator extends StatelessWidget {
         isLoading
             ? Stack(
                 children: [
-                  Opacity(
+                  const Opacity(
                     opacity: 0.6,
                     child: ModalBarrier(
                       dismissible: false,
@@ -37,7 +38,7 @@ class ModalProgressIndicator extends StatelessWidget {
                               color: Theme.of(context).colorScheme.onPrimary,
                               borderRadius: BorderRadius.circular(16)),
                           alignment: Alignment.center,
-                          child: DumbbellSpinner(),
+                          child: const DumbbellSpinner(),
                         ),
 
                         // Container(

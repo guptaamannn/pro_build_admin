@@ -12,7 +12,7 @@ InputDecoration getInputDecoration(String labelText, [IconData? iconData]) {
 /// Returns a sized box with default height of 12,
 SizedBox addSpace({double? height, double? width}) {
   return SizedBox(
-    height: height != null ? height : 12,
-    width: width != null ? width : null,
+    height: height ?? 12,
+    width: width,
   );
 }

@@ -4,7 +4,7 @@ double kFabCornerRadius = 16;
 double kFabDefaultElevation = 3;
 
 class ThemeBuilder {
-  final ColorScheme lightColorScheme = ColorScheme(
+  final ColorScheme lightColorScheme = const ColorScheme(
     brightness: Brightness.light,
     primary: Color(0xFF005CBC),
     onPrimary: Color(0xFFFFFFFF),
@@ -32,7 +32,7 @@ class ThemeBuilder {
     outline: Color(0xFF747780),
   );
 
-  final ColorScheme darkColorScheme = ColorScheme(
+  final ColorScheme darkColorScheme = const ColorScheme(
     brightness: Brightness.dark,
     primary: Color(0xFFA8C7FF),
     onPrimary: Color(0xFF012F67),
@@ -80,7 +80,7 @@ class ThemeBuilder {
         ),
         drawerTheme: DrawerThemeData(
           backgroundColor: lightColorScheme.surface,
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
               topRight: Radius.circular(16),
               bottomRight: Radius.circular(16),
@@ -127,7 +127,7 @@ class ThemeBuilder {
       //Drawer
       drawerTheme: DrawerThemeData(
         backgroundColor: darkColorScheme.surface,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topRight: Radius.circular(16),
             bottomRight: Radius.circular(16),
@@ -141,7 +141,7 @@ class ThemeBuilder {
           BottomSheetThemeData(backgroundColor: darkColorScheme.background),
       brightness: Brightness.dark,
       canvasColor: darkColorScheme.surface,
-      scaffoldBackgroundColor: Color(0xFF1F1F1F),
+      scaffoldBackgroundColor: const Color(0xFF1F1F1F),
       colorScheme: darkColorScheme,
       popupMenuTheme: PopupMenuThemeData(
         color: darkColorScheme.surface,

@@ -1,9 +1,11 @@
-import 'package:pro_build_attendance/core/enums/view_state.dart';
-import 'package:pro_build_attendance/core/model/attendance.dart';
-import 'package:pro_build_attendance/core/model/user.dart';
-import 'package:pro_build_attendance/core/services/firestore_service.dart';
-import 'package:pro_build_attendance/core/utils/formatter.dart';
-import 'package:pro_build_attendance/locator.dart';
+import 'package:pro_build_admin/core/model/user_record.dart';
+
+import '/core/enums/view_state.dart';
+import '/core/model/attendance.dart';
+import '/core/model/user.dart';
+import '/core/services/firestore_service.dart';
+import '/core/utils/formatter.dart';
+import '/locator.dart';
 
 import 'base_model.dart';
 
@@ -24,7 +26,7 @@ class AttendanceModel extends BaseModel {
 
   Attendance? get getCurrentAttendance => _currentViewAttendance;
 
-  void setCurrentAttendance(Attendance object) {
+  void setCurrentAttendance(Attendance? object) {
     _currentViewAttendance = object;
   }
 
@@ -42,6 +44,11 @@ class AttendanceModel extends BaseModel {
     required String time,
   }) async {
     setState(ViewState.busy);
+    Days userDailyRecord = Days(
+      date: _selectedDate,
+      eDate: user.eDate,
+    );
+
     String documentId = Formatter.attendanceDocumentId(_selectedDate);
 
     if (_currentViewAttendance == null ||
@@ -54,6 +61,12 @@ class AttendanceModel extends BaseModel {
       setState(ViewState.idle);
       throw 'duplicate-entry';
     }
+
+    // add to user's record subcollection here
+
+    _firestore.addUserRecord(
+        user, userDailyRecord.toJson(), _selectedDate.year.toString());
+
     setState(ViewState.idle);
   }
 
@@ -64,6 +77,8 @@ class AttendanceModel extends BaseModel {
       documentId: Formatter.attendanceDocumentId(_selectedDate),
       user: user,
     );
+    await _firestore.removeUserDailyRecord(user, _selectedDate.year.toString(),
+        Days(date: _selectedDate, eDate: user.eDate).toJson());
     _currentViewAttendance!.userIds!.remove(user.id);
     setState(ViewState.idle);
   }

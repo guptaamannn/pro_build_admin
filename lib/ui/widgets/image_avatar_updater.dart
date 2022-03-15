@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:pro_build_attendance/core/utils/image_picker.dart';
+import '/core/utils/image_picker.dart';
 
 class ImageUpdater extends StatelessWidget {
   final Function(String?)? onChange;
@@ -35,7 +35,7 @@ class ImageUpdater extends StatelessWidget {
                 onChange!(newPath);
               }
             },
-            icon: Icon(Icons.camera_alt_outlined)),
+            icon: const Icon(Icons.camera_alt_outlined)),
         alignment: Alignment.center,
       ),
     );

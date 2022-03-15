@@ -10,7 +10,7 @@ class DumbbellSpinner extends StatefulWidget {
 class _DumbbellSpinnerState extends State<DumbbellSpinner>
     with TickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
-    duration: Duration(seconds: 1),
+    duration: const Duration(seconds: 1),
     vsync: this,
   )..repeat(reverse: false);
 

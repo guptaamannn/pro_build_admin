@@ -1,22 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:nanoid/async.dart';
-import 'package:pro_build_attendance/core/enums/view_state.dart';
-import 'package:pro_build_attendance/core/model/expense.dart';
-import 'package:pro_build_attendance/core/model/invoice.dart';
-import 'package:pro_build_attendance/core/model/user.dart';
-import 'package:pro_build_attendance/core/services/firestore_service.dart';
-import 'package:pro_build_attendance/core/services/storage_service.dart';
-import 'package:pro_build_attendance/core/viewModel/base_model.dart';
-import 'package:pro_build_attendance/locator.dart';
+import '/core/enums/view_state.dart';
+import '/core/model/expense.dart';
+import '/core/model/invoice.dart';
+import '/core/model/user.dart';
+import '/core/services/firestore_service.dart';
+import '/core/services/storage_service.dart';
+import '/core/viewModel/base_model.dart';
+import '/locator.dart';
 
 class Transaction extends BaseModel {
   final _firestore = locator<FirestoreService>();
   final _storage = locator<StorageService>();
 
-  Stream<Iterable<Invoice>> invoiceStream() {
-    var stream = _firestore.invoiceStream();
-    return stream
-        .map((event) => event.docs.map((doc) => Invoice.fromJson(doc.data())));
+  Stream<Iterable<Invoice>> invoiceStream(String? userId) {
+    if (userId == null) {
+      var stream = _firestore.invoiceStream();
+      return stream.map(
+          (event) => event.docs.map((doc) => Invoice.fromJson(doc.data())));
+    } else {
+      var stream = _firestore.userInvoiceStream(userId);
+      return stream.map(
+          (event) => event.docs.map((doc) => Invoice.fromJson(doc.data())));
+    }
   }
 
   Future<void> createInvoice(Invoice invoice) async {
@@ -41,13 +47,13 @@ class Transaction extends BaseModel {
   ///Returns [IconData] based on product supplied.
   IconData getProductIcon(String product) {
     switch (product) {
-      case "Gym":
+      case "gym":
         return Icons.fitness_center;
 
-      case "Locker":
+      case "locker":
         return Icons.lock;
 
-      case "Registration":
+      case "registration":
         return Icons.how_to_reg;
 
       default:
@@ -58,19 +64,19 @@ class Transaction extends BaseModel {
   ///Returns [IconData] based on expense supplied.
   IconData getExpenseIcon(String expense) {
     switch (expense) {
-      case "Gym":
+      case "gym":
         return Icons.fitness_center;
 
-      case "Personal":
+      case "personal":
         return Icons.person_outline_rounded;
 
-      case "Protein":
+      case "protein":
         return Icons.medication_rounded;
 
-      case "Rent":
+      case "rent":
         return Icons.business_rounded;
 
-      case "Sportswear":
+      case "sportswear":
         return Icons.shopping_bag_rounded;
 
       default:

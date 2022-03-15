@@ -4,7 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:path_provider/path_provider.dart';
 
 class StorageService {
-  firebase_storage.FirebaseStorage _storage =
+  final firebase_storage.FirebaseStorage _storage =
       firebase_storage.FirebaseStorage.instance;
 
   Future<String?> uploadPicture(File image, String id) async {
@@ -15,6 +15,7 @@ class StorageService {
     } catch (e) {
       print("Something went wrong");
     }
+    return null;
   }
 
   Future<String?> downloadUrl(String userId) async {

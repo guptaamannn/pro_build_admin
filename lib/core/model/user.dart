@@ -32,10 +32,10 @@ class User {
         dpUrl: data?["dpUrl"],
         id: data?["id"],
         eDate: _timestamp is Timestamp ? _timestamp.toDate() : _timestamp,
-        email: data?["email"] == null ? "" : data?["email"],
+        email: data?["email"] ?? "",
         joinedDate:
             _joinedDate is Timestamp ? _joinedDate.toDate() : _joinedDate,
-        address: data?["address"] == null ? "" : data?["address"]);
+        address: data?["address"] ?? "");
   }
 
   factory User.fromAttendance(Map<String, dynamic> data) {

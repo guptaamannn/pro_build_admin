@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pro_build_attendance/ui/views/attendance_view.dart';
-import 'package:pro_build_attendance/ui/views/expenses_view.dart';
-import 'package:pro_build_attendance/ui/views/home_view.dart';
-import 'package:pro_build_attendance/ui/views/payments_view.dart';
-import 'package:pro_build_attendance/ui/views/users_view.dart';
+import '/ui/views/attendance_view.dart';
+import '/ui/views/expenses_view.dart';
+import '/ui/views/home_view.dart';
+import '/ui/views/payments_view.dart';
+import '/ui/views/users_view.dart';
 
 class CustomBottomNavigation extends StatelessWidget {
   final String currentRoute;
@@ -30,15 +30,15 @@ class CustomBottomNavigation extends StatelessWidget {
       showUnselectedLabels: false,
       selectedItemColor: Theme.of(context).colorScheme.onSurface,
       unselectedItemColor: Theme.of(context).colorScheme.secondaryContainer,
-      items: [
+      items: const [
         BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),
             label: "Dashboard",
             activeIcon: Icon(Icons.dashboard_rounded)),
         BottomNavigationBarItem(
-            icon: Icon(Icons.badge_outlined),
+            icon: Icon(Icons.event_note_outlined),
             label: "Attendance",
-            activeIcon: Icon(Icons.badge_rounded)),
+            activeIcon: Icon(Icons.event_note_rounded)),
         BottomNavigationBarItem(
             icon: Icon(Icons.people_alt_outlined),
             label: "Users",

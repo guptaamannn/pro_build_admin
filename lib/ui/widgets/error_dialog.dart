@@ -21,7 +21,7 @@ class ErrorDialog extends StatelessWidget {
             size: 30,
             color: Theme.of(context).colorScheme.error,
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           message == null
@@ -32,7 +32,7 @@ class ErrorDialog extends StatelessWidget {
                 ),
         ],
       ),
-      actions: [TextButton(onPressed: onTap, child: Text("Ok"))],
+      actions: [TextButton(onPressed: onTap, child: const Text("Ok"))],
     );
   }
 }

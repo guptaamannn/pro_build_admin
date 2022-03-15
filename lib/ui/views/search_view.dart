@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pro_build_attendance/core/model/user.dart';
-import 'package:pro_build_attendance/locator.dart';
-import 'package:pro_build_attendance/ui/widgets/image_avatar.dart';
+import '/core/model/user.dart';
+import '/locator.dart';
+import '/ui/widgets/image_avatar.dart';
 
 import '../../core/viewModel/user_model.dart';
 
@@ -10,7 +10,7 @@ class CustomSearchDelegate extends SearchDelegate<User?> {
   List<Widget> buildActions(BuildContext context) {
     return [
       IconButton(
-        icon: Icon(Icons.clear),
+        icon: const Icon(Icons.clear),
         onPressed: () {
           query = '';
         },
@@ -24,7 +24,7 @@ class CustomSearchDelegate extends SearchDelegate<User?> {
   @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.arrow_back),
+      icon: const Icon(Icons.arrow_back),
       onPressed: () {
         close(context, null);
       },
@@ -41,7 +41,7 @@ class CustomSearchDelegate extends SearchDelegate<User?> {
     if (query.length < 3) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
+        children: const <Widget>[
           Center(
             child: Text(
               "Search term must be longer than three letters.",
@@ -62,14 +62,14 @@ class CustomSearchDelegate extends SearchDelegate<User?> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
+                children: const <Widget>[
                   Center(child: CircularProgressIndicator()),
                 ],
               );
-            } else if (snapshot.data!.toList().length == 0) {
+            } else if (snapshot.data!.toList().isEmpty) {
               return Column(
                 mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
+                children: const <Widget>[
                   Text(
                     "No Results Found.",
                   ),
@@ -77,7 +77,7 @@ class CustomSearchDelegate extends SearchDelegate<User?> {
               );
             } else {
               var results = snapshot.data!.toList();
-              return Container(
+              return SizedBox(
                 height: 400,
                 child: ListView.builder(
                   itemCount: results.length,
